@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Authorized student of the platform",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email", "description": "Student email" },
+        "products": { "type": "array", "items": { "type": "string" }, "description": "List of product IDs the user has access to" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastLogin": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "products"]
+    },
+    "CourseConfig": {
+      "title": "Course Configuration",
+      "description": "Global settings for the LMS platform",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "bannerUrl": { "type": "string" },
+        "primaryColor": { "type": "string" },
+        "accentColor": { "type": "string" },
+        "modules": { "type": "array", "items": { "type": "object" } },
+        "upsellCourses": { "type": "array", "items": { "type": "object" } },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "WebhookEvent": {
+      "title": "Webhook Event",
+      "description": "Log of incoming webhook events from Hotmart/Kiwify",
+      "type": "object",
+      "properties": {
+        "platform": { "type": "string", "enum": ["hotmart", "kiwify"] },
+        "event": { "type": "string" },
+        "email": { "type": "string" },
+        "productId": { "type": "string" },
+        "payload": { "type": "object" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Student records"
+    },
+    "/config/main": {
+      "schema": "CourseConfig",
+      "description": "Global platform configuration"
+    },
+    "/webhook_logs/{logId}": {
+      "schema": "WebhookEvent",
+      "description": "Audit log for webhooks"
+    }
+  }
+}

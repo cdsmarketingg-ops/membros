@@ -1,12 +1,14 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CourseConfig, Module, Lesson, Material } from '../types';
 import { 
   Save, Plus, Trash2, Edit3, Image as ImageIcon, Layout as LayoutIcon, 
   Video, List, CheckCircle, ChevronDown, ChevronUp, LayoutGrid, Square, RectangleHorizontal, 
   FilePlus, Calendar, Tag, Info, Code, Bold, Italic, Strikethrough, ListOrdered, ListIcon, 
-  Link as LinkIcon, Link2, Minus, Type, MessageCircle, Rocket, Upload, FileText, X, Settings2, EyeOff, Eye, Loader2, ShoppingCart, Bell
+  Link as LinkIcon, Link2, Minus, Type, MessageCircle, Rocket, Upload, FileText, X, Settings2, EyeOff, Eye, Loader2, ShoppingCart, Bell, Users, Search as SearchIcon
 } from 'lucide-react';
+import { db } from '../src/firebase';
+import { collection, query, getDocs, doc, deleteDoc, setDoc, Timestamp } from 'firebase/firestore';
 
 interface AdminAreaProps {
   course: CourseConfig;
@@ -76,7 +78,69 @@ const LessonThumbnail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
 };
 
 const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
-  const [activeTab, setActiveTab] = useState<'general' | 'modules' | 'appearance' | 'upsells' | 'notifications'>('modules');
+  const [activeTab, setActiveTab] = useState<'general' | 'modules' | 'appearance' | 'upsells' | 'notifications' | 'students'>('modules');
+  const [students, setStudents] = useState<any[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [studentSearch, setStudentSearch] = useState('');
+  const [newStudentEmail, setNewStudentEmail] = useState('');
+
+  const fetchStudents = async () => {
+    setLoadingStudents(true);
+    try {
+      const q = query(collection(db, 'users'));
+      const querySnapshot = await getDocs(q);
+      const studentList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setStudents(studentList);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    } finally {
+      setLoadingStudents(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'students') {
+      fetchStudents();
+    }
+  }, [activeTab]);
+
+  const handleAddStudent = async () => {
+    if (!newStudentEmail) return;
+    const email = newStudentEmail.toLowerCase().trim();
+    try {
+      await setDoc(doc(db, 'users', email), {
+        email,
+        products: ['manual_entry'],
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now()
+      });
+      setNewStudentEmail('');
+      fetchStudents();
+    } catch (error) {
+      console.error("Error adding student:", error);
+      alert("Erro ao adicionar aluno");
+    }
+  };
+
+  const handleDeleteStudent = async (email: string) => {
+    setConfirmDelete({
+      title: 'Remover Aluno?',
+      message: `Tem certeza que deseja remover o acesso de ${email}?`,
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, 'users', email));
+          fetchStudents();
+        } catch (error) {
+          console.error("Error deleting student:", error);
+        }
+        setConfirmDelete(null);
+      }
+    });
+  };
+
   const [formData, setFormData] = useState<CourseConfig>({
     ...course,
     notifications: course.notifications || []
@@ -1144,6 +1208,9 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
           <button onClick={() => setActiveTab('notifications')} className={`w-full flex items-center gap-4 px-6 py-5 rounded-lg font-bold transition-all border ${activeTab === 'notifications' ? 'bg-amber-500 text-black border-amber-500 shadow-lg' : 'bg-[#111] text-white/60 border-white/5 hover:border-white/20'}`}>
             <Bell size={20} /> NOTIFICAÇÕES
           </button>
+          <button onClick={() => setActiveTab('students')} className={`w-full flex items-center gap-4 px-6 py-5 rounded-lg font-bold transition-all border ${activeTab === 'students' ? 'bg-amber-500 text-black border-amber-500 shadow-lg' : 'bg-[#111] text-white/60 border-white/5 hover:border-white/20'}`}>
+            <Users size={20} /> ALUNOS
+          </button>
         </div>
 
         <div className="col-span-12 lg:col-span-9">
@@ -1712,6 +1779,91 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                       ENVIAR AGORA PARA TODOS OS ALUNOS
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {activeTab === 'students' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="bg-[#111] border border-white/5 rounded-3xl p-8 space-y-8">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-2xl font-black uppercase italic tracking-tight">Gerenciar Alunos</h3>
+                  <div className="flex gap-4">
+                    <input 
+                      type="email"
+                      placeholder="E-mail do novo aluno"
+                      value={newStudentEmail}
+                      onChange={(e) => setNewStudentEmail(e.target.value)}
+                      className="bg-black border border-white/10 rounded-xl px-4 py-2 text-sm focus:border-amber-500 outline-none w-64"
+                    />
+                    <button 
+                      onClick={handleAddStudent}
+                      className="bg-amber-500 text-black px-6 py-2 rounded-xl font-black text-xs uppercase hover:bg-white transition-all flex items-center gap-2"
+                    >
+                      <Plus size={16} /> ADICIONAR
+                    </button>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                  <input 
+                    type="text"
+                    placeholder="Pesquisar por e-mail..."
+                    value={studentSearch}
+                    onChange={(e) => setStudentSearch(e.target.value)}
+                    className="w-full bg-black border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-sm focus:border-amber-500 outline-none"
+                  />
+                </div>
+
+                <div className="overflow-hidden rounded-2xl border border-white/5">
+                  <table className="w-full text-left">
+                    <thead className="bg-white/5 text-[10px] font-black uppercase tracking-widest text-white/40">
+                      <tr>
+                        <th className="px-6 py-4">E-mail</th>
+                        <th className="px-6 py-4">Produtos</th>
+                        <th className="px-6 py-4">Data de Cadastro</th>
+                        <th className="px-6 py-4 text-right">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {loadingStudents ? (
+                        <tr>
+                          <td colSpan={4} className="px-6 py-12 text-center">
+                            <Loader2 className="animate-spin text-amber-500 mx-auto" size={32} />
+                          </td>
+                        </tr>
+                      ) : students.filter(s => s.email.includes(studentSearch.toLowerCase())).length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="px-6 py-12 text-center text-white/20 italic text-sm">
+                            Nenhum aluno encontrado.
+                          </td>
+                        </tr>
+                      ) : students.filter(s => s.email.includes(studentSearch.toLowerCase())).map((student) => (
+                        <tr key={student.id} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="px-6 py-4 font-bold text-sm">{student.email}</td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap gap-1">
+                              {student.products?.map((p: string) => (
+                                <span key={p} className="text-[8px] font-black bg-white/10 px-2 py-0.5 rounded uppercase tracking-tighter">{p}</span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-xs text-white/40">
+                            {student.createdAt?.toDate ? student.createdAt.toDate().toLocaleDateString() : 'N/A'}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button 
+                              onClick={() => handleDeleteStudent(student.email)}
+                              className="p-2 text-white/20 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

@@ -6,34 +6,37 @@ import StudentArea from './components/StudentArea';
 import AdminArea from './components/AdminArea';
 import Login from './components/Login';
 import { ChevronLeft, User, Bell, Search, Settings, LogOut, Loader2 } from 'lucide-react';
+import { db } from './src/firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('student');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userProducts, setUserProducts] = useState<string[]>([]);
-  const [courseData, setCourseData] = useState<CourseConfig>(() => {
-    const saved = localStorage.getItem('nexus_course_data_v2');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      
-      // Force update for the 'teste-aula' zone to ensure the correct key from the screenshot is used
-      if (parsed.bunnyStorageZone === 'teste-aula') {
-        parsed.bunnyAccessKey = INITIAL_COURSE_DATA.bunnyAccessKey;
-        parsed.bunnyRegion = INITIAL_COURSE_DATA.bunnyRegion;
-        parsed.bunnyPullZoneUrl = INITIAL_COURSE_DATA.bunnyPullZoneUrl;
+  const [loadingConfig, setLoadingConfig] = useState(true);
+  const [courseData, setCourseData] = useState<CourseConfig>(INITIAL_COURSE_DATA);
+
+  // Load course config from Firestore
+  useEffect(() => {
+    const configRef = doc(db, 'config', 'main');
+    
+    const unsubscribe = onSnapshot(configRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as CourseConfig;
+        setCourseData(data);
+      } else {
+        // If no config exists, save the initial one
+        setDoc(configRef, INITIAL_COURSE_DATA);
       }
-      
-      // Update pull zone if it's still the old one (fallback)
-      if (parsed.bunnyPullZoneUrl === 'https://teste-aula.b-cdn.net') {
-        parsed.bunnyPullZoneUrl = INITIAL_COURSE_DATA.bunnyPullZoneUrl;
-      }
-      
-      // Merge with initial data to ensure new fields (like Bunny config) are present
-      return { ...INITIAL_COURSE_DATA, ...parsed };
-    }
-    return INITIAL_COURSE_DATA;
-  });
+      setLoadingConfig(false);
+    }, (error) => {
+      console.error("Error loading config:", error);
+      setLoadingConfig(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     checkSession();
@@ -73,15 +76,18 @@ const App: React.FC = () => {
 
   const isAdmin = userEmail === 'cdsmarketingg@gmail.com';
 
-  useEffect(() => {
-    localStorage.setItem('nexus_course_data_v2', JSON.stringify(courseData));
-  }, [courseData]);
-
-  const handleUpdateCourse = (newData: CourseConfig) => {
+  const handleUpdateCourse = async (newData: CourseConfig) => {
     setCourseData(newData);
+    // Save to Firestore
+    try {
+      const configRef = doc(db, 'config', 'main');
+      await setDoc(configRef, newData);
+    } catch (error) {
+      console.error("Error saving config:", error);
+    }
   };
 
-  if (isAuthenticated === null) {
+  if (isAuthenticated === null || loadingConfig) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <Loader2 className="text-amber-500 animate-spin" size={40} />

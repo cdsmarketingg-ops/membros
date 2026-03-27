@@ -9,35 +9,24 @@ import { fileURLToPath } from 'url';
 import multer from 'multer';
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
+import admin from 'firebase-admin';
 
+// Import Firebase config for projectId
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const USERS_FILE = path.join(__dirname, 'users.json');
+const firebaseConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'firebase-applet-config.json'), 'utf8'));
+
+// Initialize Firebase Admin
+admin.initializeApp({
+  projectId: firebaseConfig.projectId
+});
+
+const db = admin.firestore();
 const JWT_SECRET = process.env.JWT_SECRET || 'nexus-lms-secret-key';
 
 const upload = multer({ 
   storage: multer.memoryStorage(),
   limits: { fileSize: 500 * 1024 * 1024 } // 500MB limit
 });
-
-// Initialize users file if it doesn't exist
-if (!fs.existsSync(USERS_FILE)) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify({ authorizedEmails: [], userProducts: {} }));
-}
-
-function getUsers() {
-  try {
-    const data = fs.readFileSync(USERS_FILE, 'utf8');
-    const parsed = JSON.parse(data);
-    if (!parsed.userProducts) parsed.userProducts = {};
-    return parsed;
-  } catch (e) {
-    return { authorizedEmails: [], userProducts: {} };
-  }
-}
-
-function saveUsers(data: any) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
-}
 
 async function startServer() {
   const app = express();
@@ -63,7 +52,7 @@ async function startServer() {
   app.use(cookieParser());
 
   // --- Webhook Hotmart ---
-  app.post('/api/webhook/hotmart', (req, res) => {
+  app.post('/api/webhook/hotmart', async (req, res) => {
     const { event, data } = req.body;
     
     console.log('Received Hotmart Webhook:', event);
@@ -71,7 +60,6 @@ async function startServer() {
     if (data && data.buyer && data.buyer.email) {
       const email = data.buyer.email.toLowerCase().trim();
       const productId = data.product?.id?.toString();
-      const users = getUsers();
       
       // List of events that grant access
       const approvalEvents = ['PURCHASE_APPROVED', 'PURCHASE_COMPLETE'];
@@ -79,32 +67,44 @@ async function startServer() {
       // List of events that revoke access (Refund, Chargeback, Cancellation)
       const revokeEvents = ['PURCHASE_REFUNDED', 'PURCHASE_CHARGEBACK', 'PURCHASE_CANCELED', 'SUBSCRIPTION_CANCELLATION'];
 
-      if (approvalEvents.includes(event)) {
-        if (!users.authorizedEmails.includes(email)) {
-          users.authorizedEmails.push(email);
-        }
-        
-        if (productId) {
-          if (!users.userProducts[email]) users.userProducts[email] = [];
-          if (!users.userProducts[email].includes(productId)) {
-            users.userProducts[email].push(productId);
+      try {
+        const userRef = db.collection('users').doc(email); // Using email as doc ID for simplicity in webhooks
+        const userDoc = await userRef.get();
+        let products = userDoc.exists ? (userDoc.data()?.products || []) : [];
+
+        if (approvalEvents.includes(event)) {
+          if (productId && !products.includes(productId)) {
+            products.push(productId);
           }
+          await userRef.set({
+            email,
+            products,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: userDoc.exists ? userDoc.data()?.createdAt : admin.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          console.log(`User authorized via Hotmart: ${email} (Product: ${productId})`);
+        } else if (revokeEvents.includes(event)) {
+          if (productId) {
+            products = products.filter((id: string) => id !== productId);
+          }
+          await userRef.set({
+            products,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          console.log(`User access REVOKED via Hotmart: ${email} (Reason: ${event})`);
         }
-        
-        saveUsers(users);
-        console.log(`User authorized via Hotmart: ${email} (Product: ${productId})`);
-      } else if (revokeEvents.includes(event)) {
-        const index = users.authorizedEmails.indexOf(email);
-        if (index > -1) {
-          users.authorizedEmails.splice(index, 1);
-        }
-        
-        if (productId && users.userProducts[email]) {
-          users.userProducts[email] = users.userProducts[email].filter((id: string) => id !== productId);
-        }
-        
-        saveUsers(users);
-        console.log(`User access REVOKED via Hotmart: ${email} (Reason: ${event})`);
+
+        // Log the webhook
+        await db.collection('webhook_logs').add({
+          platform: 'hotmart',
+          event,
+          email,
+          productId,
+          payload: req.body,
+          timestamp: admin.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (error) {
+        console.error('Error processing Hotmart webhook:', error);
       }
     }
     
@@ -113,7 +113,7 @@ async function startServer() {
   });
 
   // --- Webhook Kiwify ---
-  app.post('/api/webhook/kiwify', (req, res) => {
+  app.post('/api/webhook/kiwify', async (req, res) => {
     const { order_status, Customer, product_id } = req.body;
     
     console.log('Received Kiwify Webhook:', order_status);
@@ -121,7 +121,6 @@ async function startServer() {
     if (Customer && Customer.email) {
       const email = Customer.email.toLowerCase().trim();
       const productId = product_id?.toString();
-      const users = getUsers();
       
       // List of events that grant access
       const approvalEvents = ['paid', 'completed'];
@@ -129,32 +128,44 @@ async function startServer() {
       // List of events that revoke access
       const revokeEvents = ['refunded', 'chargeback', 'canceled'];
 
-      if (approvalEvents.includes(order_status)) {
-        if (!users.authorizedEmails.includes(email)) {
-          users.authorizedEmails.push(email);
-        }
+      try {
+        const userRef = db.collection('users').doc(email);
+        const userDoc = await userRef.get();
+        let products = userDoc.exists ? (userDoc.data()?.products || []) : [];
 
-        if (productId) {
-          if (!users.userProducts[email]) users.userProducts[email] = [];
-          if (!users.userProducts[email].includes(productId)) {
-            users.userProducts[email].push(productId);
+        if (approvalEvents.includes(order_status)) {
+          if (productId && !products.includes(productId)) {
+            products.push(productId);
           }
+          await userRef.set({
+            email,
+            products,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: userDoc.exists ? userDoc.data()?.createdAt : admin.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          console.log(`User authorized via Kiwify: ${email} (Product: ${productId})`);
+        } else if (revokeEvents.includes(order_status)) {
+          if (productId) {
+            products = products.filter((id: string) => id !== productId);
+          }
+          await userRef.set({
+            products,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          console.log(`User access REVOKED via Kiwify: ${email} (Reason: ${order_status})`);
         }
 
-        saveUsers(users);
-        console.log(`User authorized via Kiwify: ${email} (Product: ${productId})`);
-      } else if (revokeEvents.includes(order_status)) {
-        const index = users.authorizedEmails.indexOf(email);
-        if (index > -1) {
-          users.authorizedEmails.splice(index, 1);
-        }
-
-        if (productId && users.userProducts[email]) {
-          users.userProducts[email] = users.userProducts[email].filter((id: string) => id !== productId);
-        }
-
-        saveUsers(users);
-        console.log(`User access REVOKED via Kiwify: ${email} (Reason: ${order_status})`);
+        // Log the webhook
+        await db.collection('webhook_logs').add({
+          platform: 'kiwify',
+          event: order_status,
+          email,
+          productId,
+          payload: req.body,
+          timestamp: admin.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (error) {
+        console.error('Error processing Kiwify webhook:', error);
       }
     }
     
@@ -164,19 +175,19 @@ async function startServer() {
   // --- Auth Endpoints ---
 
   // Check current session
-  app.get('/api/auth/session', (req, res) => {
+  app.get('/api/auth/session', async (req, res) => {
     const token = req.cookies.nexus_session;
     if (!token) return res.status(401).json({ authenticated: false });
 
     try {
       const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
-      const users = getUsers();
-      const userProducts = users.userProducts[decoded.email] || [];
+      const userDoc = await db.collection('users').doc(decoded.email).get();
+      const products = userDoc.exists ? (userDoc.data()?.products || []) : [];
       
       res.json({ 
         authenticated: true, 
         email: decoded.email,
-        products: userProducts
+        products: products
       });
     } catch (e) {
       res.status(401).json({ authenticated: false });
@@ -184,34 +195,39 @@ async function startServer() {
   });
 
   // Login (Passwordless)
-  app.post('/api/auth/login', (req, res) => {
+  app.post('/api/auth/login', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email is required' });
 
     const normalizedEmail = email.toLowerCase().trim();
-    const users = getUsers();
-
-    const isAuthorized = users.authorizedEmails.includes(normalizedEmail) || 
-                        (users.userProducts[normalizedEmail] && users.userProducts[normalizedEmail].length > 0);
-
-    if (isAuthorized || normalizedEmail === 'cdsmarketingg@gmail.com') {
-      const token = jwt.sign({ email: normalizedEmail }, JWT_SECRET, { expiresIn: '7d' });
+    
+    try {
+      const userDoc = await db.collection('users').doc(normalizedEmail).get();
+      const products = userDoc.exists ? (userDoc.data()?.products || []) : [];
       
-      res.cookie('nexus_session', token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-      });
+      const isAuthorized = products.length > 0 || normalizedEmail === 'cdsmarketingg@gmail.com';
 
-      const userProducts = users.userProducts[normalizedEmail] || [];
-      res.json({ 
-        success: true, 
-        email: normalizedEmail,
-        products: userProducts
-      });
-    } else {
-      res.status(403).json({ error: 'Email não autorizado. Verifique se sua compra foi aprovada.' });
+      if (isAuthorized) {
+        const token = jwt.sign({ email: normalizedEmail }, JWT_SECRET, { expiresIn: '7d' });
+        
+        res.cookie('nexus_session', token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'none',
+          maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+
+        res.json({ 
+          success: true, 
+          email: normalizedEmail,
+          products: products
+        });
+      } else {
+        res.status(403).json({ error: 'Email não autorizado. Verifique se sua compra foi aprovada.' });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ error: 'Erro interno ao processar login' });
     }
   });
 
@@ -226,17 +242,33 @@ async function startServer() {
   });
 
   // --- Admin Helper (For testing/demo) ---
-  app.post('/api/admin/authorize', (req, res) => {
-    const { email } = req.body;
+  app.post('/api/admin/authorize', async (req, res) => {
+    const { email, productId } = req.body;
     if (!email) return res.status(400).send('Email required');
     
-    const users = getUsers();
     const normalizedEmail = email.toLowerCase().trim();
-    if (!users.authorizedEmails.includes(normalizedEmail)) {
-      users.authorizedEmails.push(normalizedEmail);
-      saveUsers(users);
+    try {
+      const userRef = db.collection('users').doc(normalizedEmail);
+      const userDoc = await userRef.get();
+      let products = userDoc.exists ? (userDoc.data()?.products || []) : [];
+      
+      if (productId && !products.includes(productId)) {
+        products.push(productId);
+      } else if (!productId && products.length === 0) {
+        products.push('default_product');
+      }
+
+      await userRef.set({
+        email: normalizedEmail,
+        products,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: userDoc.exists ? userDoc.data()?.createdAt : admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      
+      res.send('Authorized');
+    } catch (error) {
+      res.status(500).send('Error');
     }
-    res.send('Authorized');
   });
 
   // --- Real-time Notifications ---
