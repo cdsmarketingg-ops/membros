@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Mail, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
 
@@ -19,7 +18,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setError(null);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('https://api.rafaelpedrozo.online/membros/admin-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -27,12 +26,14 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
       const data = await response.json();
 
-      if (response.ok) {
-        onLoginSuccess(data.email, data.products || []);
+      if (data.admin) {
+        onLoginSuccess(email, []);
       } else {
-        setError(data.error || 'Ocorreu um erro ao tentar entrar.');
+        setError('Acesso negado.');
       }
+
     } catch (err) {
+      console.error(err);
       setError('Erro de conexão com o servidor.');
     } finally {
       setLoading(false);
