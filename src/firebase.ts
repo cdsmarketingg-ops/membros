@@ -1,14 +1,22 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import firebaseConfig from "./firebase-applet-config.json";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDNuwcLUnou4HhyQzGCYuWcXTxSwJxag_IY",
+  authDomain: "gen-lang-client-0020267451.firebaseapp.com",
+  projectId: "gen-lang-client-0020267451",
+  storageBucket: "gen-lang-client-0020267451.appspot.com",
+  messagingSenderId: "343325480795",
+  appId: "1:343325480795:web:91a019c98bab3a957f2c7e",
+  firestoreDatabase: "ai-studio-58339ef4-aeee-45c4-9695-bee75ab77d58"
+};
 
 const app = initializeApp(firebaseConfig);
 
-// 👇 USA O BANCO CERTO (ESSA LINHA RESOLVE TUDO)
 export const db = getFirestore(
   app,
-  firebaseConfig.firestoreDatabase
+  firebaseConfig.firestoreDatabase as string
 );
 
 export const auth = getAuth(app);
