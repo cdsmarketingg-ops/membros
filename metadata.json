@@ -1,0 +1,8 @@
+{
+  "name": "Nexus LMS - Premium Member Area",
+  "description": "A high-end membership platform inspired by Kiwify and Hotmart, featuring a full admin dashboard for complete customization of modules, lessons, and branding.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
