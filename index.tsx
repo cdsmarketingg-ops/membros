@@ -18,7 +18,9 @@ root.render(
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./pwabuilder-sw.js')
+   navigator.serviceWorker.register('/pwabuilder-sw.js', {
+  scope: '/'
+})
       .then(reg => console.log('SW registrado', reg))
       .catch(err => console.log('Erro SW', err));
   });

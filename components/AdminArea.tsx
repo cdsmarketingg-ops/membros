@@ -78,11 +78,36 @@ const LessonThumbnail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
 };
 
 const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
-  const [activeTab, setActiveTab] = useState<'general' | 'modules' | 'appearance' | 'upsells' | 'notifications' | 'students'>('modules');
+  const [activeTab, setActiveTab] = useState<'general' | 'modules' | 'appearance' | 'upsells' | 'notifications' | 'students' | 'bunny-files'>('modules');
   const [students, setStudents] = useState<any[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [studentSearch, setStudentSearch] = useState('');
   const [newStudentEmail, setNewStudentEmail] = useState('');
+  const [bunnyFiles, setBunnyFiles] = useState<any[]>([]);
+  const [loadingBunny, setLoadingBunny] = useState(false);
+
+  const fetchBunnyFiles = async () => {
+    setLoadingBunny(true);
+    try {
+      const response = await fetch('/api/admin/files');
+      if (response.ok) {
+        const data = await response.json();
+        setBunnyFiles(data);
+      } else {
+        console.error('Failed to fetch bunny files');
+      }
+    } catch (error) {
+      console.error('Error fetching bunny files:', error);
+    } finally {
+      setLoadingBunny(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'bunny-files') {
+      fetchBunnyFiles();
+    }
+  }, [activeTab]);
 
   const fetchStudents = async () => {
     setLoadingStudents(true);
@@ -1211,6 +1236,9 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
           <button onClick={() => setActiveTab('students')} className={`w-full flex items-center gap-4 px-6 py-5 rounded-lg font-bold transition-all border ${activeTab === 'students' ? 'bg-amber-500 text-black border-amber-500 shadow-lg' : 'bg-[#111] text-white/60 border-white/5 hover:border-white/20'}`}>
             <Users size={20} /> ALUNOS
           </button>
+          <button onClick={() => setActiveTab('bunny-files')} className={`w-full flex items-center gap-4 px-6 py-5 rounded-lg font-bold transition-all border ${activeTab === 'bunny-files' ? 'bg-amber-500 text-black border-amber-500 shadow-lg' : 'bg-[#111] text-white/60 border-white/5 hover:border-white/20'}`}>
+            <LayoutGrid size={20} /> ARQUIVOS BUNNY
+          </button>
         </div>
 
         <div className="col-span-12 lg:col-span-9">
@@ -1866,6 +1894,99 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+          {activeTab === 'bunny-files' && (
+            <div className="bg-[#111] border border-white/5 rounded-2xl p-10 space-y-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <LayoutGrid size={20} className="text-amber-500" />
+                  <h3 className="text-xl font-bold text-white uppercase italic">Arquivos no BunnyCDN</h3>
+                </div>
+                <button 
+                  onClick={fetchBunnyFiles}
+                  disabled={loadingBunny}
+                  className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all border border-white/10 flex items-center gap-2"
+                >
+                  {loadingBunny ? <Loader2 className="animate-spin" size={14} /> : <Rocket size={14} />}
+                  ATUALIZAR LISTA
+                </button>
+              </div>
+
+              {loadingBunny ? (
+                <div className="py-20 flex flex-col items-center justify-center gap-4">
+                  <Loader2 className="animate-spin text-amber-500" size={40} />
+                  <p className="text-white/40 font-bold uppercase tracking-widest text-xs">Acessando Storage Zone...</p>
+                </div>
+              ) : bunnyFiles.length === 0 ? (
+                <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-2xl">
+                  <p className="text-white/20 font-black uppercase tracking-widest italic">Nenhum arquivo encontrado no storage</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {bunnyFiles.map((file) => {
+                    const pullZoneUrl = formData.bunnyPullZoneUrl?.trim()?.replace(/\/$/, '') || 'https://teste-aula.b-cdn.net';
+                    const fileUrl = `${pullZoneUrl}/${file.ObjectName}`;
+                    const isVideo = file.ObjectName.toLowerCase().endsWith('.mp4') || file.ObjectName.toLowerCase().endsWith('.webm');
+                    const isImage = ['jpg', 'jpeg', 'png', 'webp', 'gif'].some(ext => file.ObjectName.toLowerCase().endsWith(ext));
+
+                    return (
+                      <div key={file.Guid} className="bg-black/40 border border-white/10 rounded-xl p-4 space-y-4 group hover:border-amber-500/50 transition-all">
+                        <div className="aspect-video bg-black rounded-lg overflow-hidden relative">
+                          {isImage ? (
+                            <img src={fileUrl} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt={file.ObjectName} />
+                          ) : isVideo ? (
+                            <video src={`${fileUrl}#t=0.5`} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" muted />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-white/20">
+                              <FileText size={32} />
+                            </div>
+                          )}
+                          <div className="absolute top-2 right-2 bg-black/80 px-2 py-1 rounded text-[8px] font-bold text-white/60">
+                            {(file.Length / (1024 * 1024)).toFixed(2)} MB
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black text-white truncate" title={file.ObjectName}>{file.ObjectName}</p>
+                          <p className="text-[8px] text-white/40 uppercase tracking-widest">
+                            {new Date(file.LastChanged).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => copyToClipboard(fileUrl)}
+                            className="flex-1 bg-white/5 hover:bg-white/10 text-white py-2 rounded-lg text-[10px] font-black transition-all border border-white/10 uppercase"
+                          >
+                            Copiar Link
+                          </button>
+                          <button 
+                            onClick={async () => {
+                              setConfirmDelete({
+                                title: 'Apagar do Bunny?',
+                                message: `Tem certeza que deseja apagar permanentemente o arquivo ${file.ObjectName}?`,
+                                onConfirm: async () => {
+                                  const success = await deleteFromBunny(fileUrl);
+                                  if (success) {
+                                    fetchBunnyFiles();
+                                  } else {
+                                    alert('Erro ao apagar arquivo');
+                                  }
+                                  setConfirmDelete(null);
+                                }
+                              });
+                            }}
+                            className="bg-red-500/10 hover:bg-red-500/20 text-red-500 p-2 rounded-lg transition-all border border-red-500/20"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>

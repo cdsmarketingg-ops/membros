@@ -312,6 +312,51 @@ async function startServer() {
     res.json({ success: true, sentTo: count });
   });
 
+  // --- Bunny.net List Files ---
+  app.get('/api/admin/files', async (req, res) => {
+    // Check if user is admin
+    const token = req.cookies.nexus_session;
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+    
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+      if (decoded.email !== 'cdsmarketingg@gmail.com') {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+    } catch (e) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const storageZone = process.env.BUNNY_STORAGE_ZONE || 'teste-aula';
+    const accessKey = process.env.BUNNY_ACCESS_KEY || '22baafe9-93d9-4501-b18ebad00488-7e0a-4567';
+    const region = process.env.BUNNY_REGION || 'br';
+    // Using the regional endpoint as seen in previous logic
+    const bunnyUrl = `https://${region}.storage.bunnycdn.com/${storageZone}/`;
+
+    try {
+      console.log(`Listing files from Bunny.net: ${bunnyUrl}`);
+      const response = await fetch(bunnyUrl, {
+        method: 'GET',
+        headers: {
+          'AccessKey': accessKey,
+          'Accept': 'application/json'
+        },
+      });
+
+      if (response.ok) {
+        const files = await response.json();
+        res.json(files);
+      } else {
+        const errorText = await response.text();
+        console.error('Bunny.net list error:', errorText);
+        res.status(500).json({ error: 'Failed to list files from Bunny.net', details: errorText });
+      }
+    } catch (error) {
+      console.error('List error:', error);
+      res.status(500).json({ error: 'Internal server error during listing', details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
   // --- Bunny.net Upload ---
   app.post('/api/admin/upload', upload.single('file'), async (req, res) => {
     console.log('--- NOVA TENTATIVA DE UPLOAD RECEBIDA ---');
@@ -332,9 +377,10 @@ async function startServer() {
     const file = req.file;
     if (!file) return res.status(400).json({ error: 'No file uploaded' });
 
-    const storageZone = 'teste-aula';
-    const accessKey = '22baafe9-93d9-4501-b18ebad00488-7e0a-4567';
-    const pullZoneUrl = 'https://teste-aula.b-cdn.net';
+    const storageZone = process.env.BUNNY_STORAGE_ZONE || 'teste-aula';
+    const accessKey = process.env.BUNNY_ACCESS_KEY || '22baafe9-93d9-4501-b18ebad00488-7e0a-4567';
+    const pullZoneUrl = process.env.BUNNY_PULL_ZONE_URL || 'https://teste-aula.b-cdn.net';
+    const region = process.env.BUNNY_REGION || 'br';
 
     if (!storageZone || !accessKey) {
       return res.status(500).json({ error: 'Bunny.net configuration missing in environment variables' });
