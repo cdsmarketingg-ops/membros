@@ -4,11 +4,11 @@ import { INITIAL_COURSE_DATA } from './constants';
 import StudentArea from './components/StudentArea';
 import AdminArea from './components/AdminArea';
 import Login from './components/Login';
-import { Loader2 } from 'lucide-react';
+import { ChevronLeft, Settings, LogOut, Loader2 } from 'lucide-react';
 import { db } from './src/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 
-const API_URL = 'https://SEU-BACKEND.com'; // 🔥 TROQUE ISSO
+const API_URL = 'https://api.rafaelpedrozo.online/membros';
 
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('student');
@@ -18,7 +18,7 @@ const App: React.FC = () => {
   const [loadingConfig, setLoadingConfig] = useState(true);
   const [courseData, setCourseData] = useState<CourseConfig>(INITIAL_COURSE_DATA);
 
-  // 🔥 CONFIG FIREBASE (OK)
+  // 🔥 FIREBASE CONFIG
   useEffect(() => {
     const configRef = doc(db, 'config', 'main');
 
@@ -32,109 +32,105 @@ const App: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // 🔥 RESTAURA LOGIN IMEDIATO
+  // 🔥 RESTAURA LOGIN (SEM API QUEBRANDO)
   useEffect(() => {
-    const token = localStorage.getItem('nexus_token');
-    const email = localStorage.getItem('nexus_email');
+    const savedEmail = localStorage.getItem('user_email');
 
-    if (token) {
+    if (savedEmail) {
+      setUserEmail(savedEmail);
       setIsAuthenticated(true);
-      if (email) setUserEmail(email);
     } else {
       setIsAuthenticated(false);
     }
-
-    // valida em background
-    checkSession();
   }, []);
 
-  // 🔥 VALIDAÇÃO COM BACKEND (SEM QUEBRAR UX)
-  const checkSession = async () => {
+  // 🔥 LOGIN VIA BACKEND (CHECK ACCESS)
+  const handleLoginSuccess = async (email: string) => {
     try {
-      const token = localStorage.getItem('nexus_token');
-
-      if (!token) return;
-
-      const response = await fetch(`${API_URL}/api/auth/session`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await fetch(`${API_URL}/check-access`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
       });
 
-      if (!response.ok) return;
+      const data = await res.json();
 
-      const data = await response.json();
-
-      if (data.authenticated) {
+      if (data.access) {
+        localStorage.setItem('user_email', email);
+        setUserEmail(email);
         setIsAuthenticated(true);
-        setUserEmail(data.email);
-        setUserProducts(data.products || []);
-
-        if (data.token) {
-          localStorage.setItem('nexus_token', data.token);
-        }
-
-        localStorage.setItem('nexus_email', data.email);
       } else {
-        // 🔥 só desloga se tiver certeza
-        handleLogout();
+        alert('Você não tem acesso ainda.');
       }
     } catch (error) {
-      console.warn('Erro ao validar sessão (ignorado):', error);
-      // 🔥 NÃO desloga
+      console.error(error);
+      alert('Erro ao conectar com servidor');
     }
   };
 
-  // 🔥 LOGIN
-  const handleLoginSuccess = (email: string, products: string[]) => {
-    setIsAuthenticated(true);
-    setUserEmail(email);
-    setUserProducts(products || []);
-
-    localStorage.setItem('nexus_email', email);
-  };
-
-  // 🔥 LOGOUT
-  const handleLogout = async () => {
-    try {
-      await fetch(`${API_URL}/api/auth/logout`, { method: 'POST' });
-    } catch (e) {}
-
-    localStorage.removeItem('nexus_token');
-    localStorage.removeItem('nexus_email');
-
+  // 🔥 LOGOUT SIMPLES (SEM API)
+  const handleLogout = () => {
+    localStorage.removeItem('user_email');
     setIsAuthenticated(false);
     setUserEmail(null);
-    setUserProducts([]);
   };
 
-  // 🔥 LOADING BONITO
+  const isAdmin = userEmail === 'cdsmarketingg@gmail.com';
+
   if (isAuthenticated === null || loadingConfig) {
     return (
-      <div className="h-screen flex items-center justify-center bg-black text-white">
-        <Loader2 className="animate-spin" size={40} />
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <Loader2 className="text-amber-500 animate-spin" size={40} />
       </div>
     );
   }
 
-  // 🔥 NÃO LOGADO
   if (!isAuthenticated) {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
-  // 🔥 LOGADO
-  if (view === 'admin') {
-    return <AdminArea courseData={courseData} />;
-  }
+  const currentView = isAdmin ? view : 'student';
 
   return (
-    <StudentArea
-      courseData={courseData}
-      userEmail={userEmail}
-      userProducts={userProducts}
-      onLogout={handleLogout}
-      onSwitchView={setView}
-    />
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col font-sans">
+      <header className="fixed top-0 left-0 right-0 z-[100] h-14 bg-[#111] border-b border-white/10 flex items-center justify-between px-4 md:px-6">
+        <div>
+          <button 
+            onClick={() => setView('student')}
+            className="text-white/60 hover:text-white flex items-center gap-2 text-sm"
+          >
+            <ChevronLeft size={18} />
+            Configurações
+          </button>
+        </div>
+
+        <div className="flex items-center gap-4 text-sm">
+          {isAdmin && (
+            <button 
+              onClick={() => setView(view === 'admin' ? 'student' : 'admin')}
+              className="bg-white/5 border border-white/10 px-3 py-1.5 rounded flex items-center gap-2"
+            >
+              {view === 'admin' ? 'Produtor' : 'Aluno'}
+              <Settings size={14} />
+            </button>
+          )}
+
+          <span className="text-white/40">{userEmail}</span>
+
+          <button onClick={handleLogout}>
+            <LogOut size={18} />
+          </button>
+        </div>
+      </header>
+
+      <main className="flex-1 mt-14 overflow-hidden">
+        {currentView === 'student' ? (
+          <StudentArea course={courseData} userProducts={userProducts} />
+        ) : (
+          <AdminArea course={courseData} />
+        )}
+      </main>
+    </div>
   );
 };
 

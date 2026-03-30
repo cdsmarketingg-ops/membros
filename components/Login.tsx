@@ -18,7 +18,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setError(null);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('https://api.rafaelpedrozo.online/membros/admin-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -26,13 +26,10 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
       const data = await response.json();
 
-      if (data.success) {
-        if (data.token) {
-          localStorage.setItem('nexus_token', data.token);
-        }
-        onLoginSuccess(data.email, data.products || []);
+      if (data.admin) {
+        onLoginSuccess(email, []);
       } else {
-        setError(data.error || 'Acesso negado.');
+        setError('Acesso negado.');
       }
 
     } catch (err) {
