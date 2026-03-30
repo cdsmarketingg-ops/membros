@@ -562,23 +562,23 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         </nav>
 
         {/* MODULE HEADER */}
-        <div className="relative w-full h-[300px] overflow-hidden">
+        <div className="relative w-full h-[200px] md:h-[300px] overflow-hidden">
           <img 
             src={selectedModule?.thumbnailUrl} 
             className="w-full h-full object-cover opacity-30 blur-sm scale-110" 
             alt="Module Banner"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
-          <div className="absolute bottom-12 left-12">
-            <p className="text-amber-500 font-black text-[10px] uppercase tracking-[0.4em] mb-4 italic">{t('selectedModule')}</p>
-            <h1 className="text-4xl lg:text-6xl font-black uppercase italic tracking-tighter leading-none">{selectedModule?.title}</h1>
-            <p className="text-white/40 text-sm mt-4 font-bold uppercase tracking-widest">{selectedModule?.lessons.length} {t('lessonsAvailable')}</p>
+          <div className="absolute bottom-6 md:bottom-12 left-6 md:left-12">
+            <p className="text-amber-500 font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] mb-2 md:mb-4 italic">{t('selectedModule')}</p>
+            <h1 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase italic tracking-tighter leading-none">{selectedModule?.title}</h1>
+            <p className="text-white/40 text-xs md:text-sm mt-2 md:mt-4 font-bold uppercase tracking-widest">{selectedModule?.lessons.length} {t('lessonsAvailable')}</p>
           </div>
         </div>
 
         {/* LESSONS LIST */}
-        <section className="px-12 py-20 max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <section className="px-4 md:px-12 py-10 md:py-20 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
             {selectedModule?.lessons.map((lesson, idx) => (
               <div 
                 key={lesson.id}
@@ -618,10 +618,10 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
   return (
     <div className="h-full overflow-y-auto custom-scrollbar bg-[#0a0a0a]">
       {/* STUDENT HEADER */}
-      <nav className="h-16 flex items-center justify-between px-8 bg-black/50 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50">
-        <div className="flex items-center gap-10">
+      <nav className="h-16 flex items-center justify-between px-4 md:px-8 bg-black/50 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50">
+        <div className="flex items-center gap-4 md:gap-10">
           <div className="flex items-center gap-3">
-            <Menu className="text-white/60 lg:hidden" />
+            <Menu className="text-white/60 lg:hidden cursor-pointer" onClick={() => setIsMobileSidebarOpen(true)} />
             <img src={course.logoUrl} className="w-8 h-8 rounded-lg shadow-lg border border-white/10 object-contain bg-white/5 p-1" alt="Logo" />
             <span className="font-black text-lg tracking-tighter hidden md:block uppercase italic">{course.name}</span>
           </div>
@@ -631,8 +631,8 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
             <a href="#" className="hover:text-white transition-colors">{t('community')}</a>
           </div>
         </div>
-        <div className="flex items-center gap-6 relative">
-          <Search size={20} className="text-white/40" />
+        <div className="flex items-center gap-3 md:gap-6 relative">
+          <Search size={20} className="text-white/40 hidden xs:block" />
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative text-white/40 hover:text-amber-500 transition-colors"
@@ -644,7 +644,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
           </button>
 
           {showNotifications && (
-            <div className="absolute top-12 right-0 w-80 bg-[#111] border border-white/10 rounded-2xl shadow-2xl z-[200] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute top-12 right-0 w-[280px] md:w-80 bg-[#111] border border-white/10 rounded-2xl shadow-2xl z-[200] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-white/60">Notificações</h4>
                 <button onClick={() => setNotifications([])} className="text-[8px] font-black text-white/20 hover:text-white uppercase tracking-tighter">Limpar Tudo</button>
@@ -682,36 +682,75 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         </div>
       </nav>
 
+      {/* MOBILE SIDEBAR (Visible on small screens when Menu is clicked) */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-[110] w-72 bg-[#111] border-r border-white/5 flex flex-col
+        transition-transform duration-300 transform lg:hidden
+        ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src={course.logoUrl} className="w-6 h-6 object-contain" alt="Logo" />
+            <span className="font-black text-sm uppercase italic tracking-tighter">{course.name}</span>
+          </div>
+          <button onClick={() => setIsMobileSidebarOpen(false)} className="text-white/40">
+            <X size={24} />
+          </button>
+        </div>
+        <div className="flex-1 p-6 space-y-6">
+          <div className="space-y-2">
+            <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-4">Navegação</p>
+            <a href="#" className="flex items-center gap-3 text-sm font-bold text-amber-500 bg-white/5 p-3 rounded-xl">
+              <Layout size={18} /> {t('showcase')}
+            </a>
+            <a href="#" className="flex items-center gap-3 text-sm font-bold text-white/60 p-3 rounded-xl hover:bg-white/5 transition-colors">
+              <Play size={18} /> {t('myTrainings')}
+            </a>
+            <a href="#" className="flex items-center gap-3 text-sm font-bold text-white/60 p-3 rounded-xl hover:bg-white/5 transition-colors">
+              <MessageCircle size={18} /> {t('community')}
+            </a>
+          </div>
+        </div>
+      </aside>
+
+      {/* MOBILE SIDEBAR OVERLAY */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] lg:hidden"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
       {/* STUDENT BANNER */}
-      <div className="relative w-full h-[500px] overflow-hidden group">
+      <div className="relative w-full h-[350px] md:h-[500px] overflow-hidden group">
         <img 
           src={course.bannerUrl} 
           className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[2000ms]" 
           alt="Banner"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
-        <div className="absolute bottom-12 left-12 max-w-2xl">
-          <p className="text-amber-500 font-black text-[10px] uppercase tracking-[0.4em] mb-4 italic">{t('restrictedAccess')}</p>
-          <h1 className="text-5xl lg:text-8xl font-black mb-8 drop-shadow-2xl uppercase italic tracking-tighter leading-none">{course.name}</h1>
+        <div className="absolute bottom-8 md:bottom-12 left-6 md:left-12 max-w-2xl">
+          <p className="text-amber-500 font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] mb-2 md:mb-4 italic">{t('restrictedAccess')}</p>
+          <h1 className="text-3xl md:text-5xl lg:text-8xl font-black mb-4 md:mb-8 drop-shadow-2xl uppercase italic tracking-tighter leading-none">{course.name}</h1>
           <button 
             onClick={() => enterModule(course.modules[0])}
-            className="px-12 py-5 bg-white text-black font-black rounded-xl flex items-center gap-4 hover:bg-amber-500 transition-all shadow-2xl scale-100 hover:scale-105 active:scale-95 text-xs tracking-widest italic uppercase"
+            className="px-8 md:px-12 py-4 md:py-5 bg-white text-black font-black rounded-xl flex items-center gap-3 md:gap-4 hover:bg-amber-500 transition-all shadow-2xl scale-100 hover:scale-105 active:scale-95 text-[10px] md:text-xs tracking-widest italic uppercase"
           >
-            <Play fill="black" size={20} /> {t('resumeTraining')}
+            <Play fill="black" size={18} /> {t('resumeTraining')}
           </button>
         </div>
       </div>
 
       {/* MODULES GRID */}
-      <section className="px-12 py-20">
-        <div className="flex items-center justify-between mb-16">
-          <h2 className="text-3xl font-black uppercase italic tracking-tight flex items-center gap-4">
-            {t('courseModules')} <span className="text-white/10 font-light text-sm not-italic">({course.modules.length})</span>
+      <section className="px-4 md:px-12 py-10 md:py-20">
+        <div className="flex items-center justify-between mb-8 md:mb-16">
+          <h2 className="text-xl md:text-3xl font-black uppercase italic tracking-tight flex items-center gap-2 md:gap-4">
+            {t('courseModules')} <span className="text-white/10 font-light text-xs md:text-sm not-italic">({course.modules.length})</span>
           </h2>
-          <div className="h-[1px] flex-1 mx-12 bg-white/5" />
+          <div className="h-[1px] flex-1 mx-4 md:mx-12 bg-white/5" />
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-10">
           {course.modules.map((mod) => {
             const locked = isModuleLocked(mod);
             return (
@@ -767,8 +806,8 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         
         if (locked) {
           return (
-            <section key={upsell.id} className="px-12 py-20 border-t border-white/5">
-               <div className="relative w-full h-[400px] rounded-3xl overflow-hidden group border border-white/5 hover:border-amber-500/30 transition-all">
+            <section key={upsell.id} className="px-4 md:px-12 py-10 md:py-20 border-t border-white/5">
+               <div className="relative w-full h-[300px] md:h-[400px] rounded-3xl overflow-hidden group border border-white/5 hover:border-amber-500/30 transition-all">
                   <img 
                     src={upsell.bannerUrl || upsell.thumbnailUrl} 
                     className="w-full h-full object-cover grayscale blur-[2px] group-hover:grayscale-0 group-hover:blur-0 transition-all duration-700" 
@@ -776,18 +815,18 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-black/60 backdrop-blur-sm group-hover:bg-black/40 transition-all" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
-                    <div className="w-20 h-20 bg-amber-500 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-amber-500/20">
-                      <Lock className="text-black" size={40} />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-12 text-center">
+                    <div className="w-12 h-12 md:w-20 md:h-20 bg-amber-500 rounded-full flex items-center justify-center mb-4 md:mb-6 shadow-2xl shadow-amber-500/20">
+                      <Lock className="text-black" size={24} />
                     </div>
-                    <p className="text-amber-500 font-black text-[10px] uppercase tracking-[0.4em] mb-4 italic">{t('exclusiveOffer')}</p>
-                    <h2 className="text-4xl lg:text-6xl font-black mb-6 uppercase italic tracking-tighter">{upsell.title}</h2>
-                    <p className="text-white/60 max-w-2xl mb-10 text-sm lg:text-base line-clamp-2">{upsell.description}</p>
+                    <p className="text-amber-500 font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] mb-2 md:mb-4 italic">{t('exclusiveOffer')}</p>
+                    <h2 className="text-2xl md:text-4xl lg:text-6xl font-black mb-4 md:mb-6 uppercase italic tracking-tighter">{upsell.title}</h2>
+                    <p className="text-white/60 max-w-2xl mb-6 md:mb-10 text-xs md:text-sm lg:text-base line-clamp-2">{upsell.description}</p>
                     <button 
                       onClick={() => window.open(upsell.upsellUrl, '_blank')}
-                      className="px-12 py-5 bg-amber-500 text-black font-black rounded-xl flex items-center gap-4 hover:bg-white transition-all shadow-2xl text-xs tracking-widest italic uppercase"
+                      className="px-8 md:px-12 py-4 md:py-5 bg-amber-500 text-black font-black rounded-xl flex items-center gap-3 md:gap-4 hover:bg-white transition-all shadow-2xl text-[10px] md:text-xs tracking-widest italic uppercase"
                     >
-                      <ShoppingCart size={20} /> {t('getAccessNow')}
+                      <ShoppingCart size={18} /> {t('getAccessNow')}
                     </button>
                   </div>
                </div>
@@ -796,8 +835,8 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         }
 
         return (
-          <section key={upsell.id} className="px-12 py-20 border-t border-white/5">
-            <div className="flex items-center justify-between mb-16">
+          <section key={upsell.id} className="px-4 md:px-12 py-10 md:py-20 border-t border-white/5">
+            <div className="flex items-center justify-between mb-8 md:mb-16">
               <div>
                 <p className="text-amber-500 font-black text-[10px] uppercase tracking-[0.4em] mb-2 italic">{t('additionalCourse')}</p>
                 <h2 className="text-3xl font-black uppercase italic tracking-tight flex items-center gap-4">

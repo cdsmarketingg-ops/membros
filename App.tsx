@@ -108,35 +108,35 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black">
       {/* Top Bar Producer Style */}
-      <header className="fixed top-0 left-0 right-0 z-[100] h-14 bg-[#111] border-b border-white/10 flex items-center justify-between px-6">
-        <div className="flex items-center gap-4">
+      <header className="fixed top-0 left-0 right-0 z-[100] h-14 bg-[#111] border-b border-white/10 flex items-center justify-between px-4 md:px-6">
+        <div className="flex items-center gap-2 md:gap-4">
           <button 
             onClick={() => setView('student')}
-            className="text-white/60 hover:text-white flex items-center gap-2 text-sm transition-colors"
+            className="text-white/60 hover:text-white flex items-center gap-1 md:gap-2 text-xs md:text-sm transition-colors"
           >
             <ChevronLeft size={18} />
-            <span>Configurações</span>
+            <span className="hidden xs:inline">Configurações</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-2 md:gap-6">
+          <div className="flex items-center gap-2 md:gap-6 text-xs md:text-sm">
             {isAdmin && (
               <>
                 <span className="text-white/60 hidden sm:inline">Visualizando como:</span>
                 <button 
                   onClick={() => setView(view === 'admin' ? 'student' : 'admin')}
-                  className="bg-white/5 border border-white/10 px-4 py-1.5 rounded flex items-center gap-2 hover:bg-white/10 transition-all font-medium"
+                  className="bg-white/5 border border-white/10 px-2 md:px-4 py-1.5 rounded flex items-center gap-1 md:gap-2 hover:bg-white/10 transition-all font-medium"
                 >
-                  {view === 'admin' ? 'Produtor' : 'Aluno'}
-                  <Settings size={14} className="text-white/40" />
+                  <span className="text-[10px] md:text-xs">{view === 'admin' ? 'Produtor' : 'Aluno'}</span>
+                  <Settings size={12} className="text-white/40" />
                 </button>
-                <div className="h-6 w-[1px] bg-white/10 mx-1" />
+                <div className="h-6 w-[1px] bg-white/10 mx-1 hidden xs:block" />
               </>
             )}
             
             <div className="flex items-center gap-2">
-              <span className="text-white/40 text-xs hidden md:inline">{userEmail}</span>
+              <span className="text-white/40 text-[10px] md:text-xs hidden md:inline">{userEmail}</span>
               <button 
                 onClick={handleLogout}
                 className="text-white/40 hover:text-white transition-colors p-1.5"
