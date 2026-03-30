@@ -25,9 +25,6 @@ const App: React.FC = () => {
       if (docSnap.exists()) {
         const data = docSnap.data() as CourseConfig;
         setCourseData(data);
-      } else {
-        // If no config exists, save the initial one
-        setDoc(configRef, INITIAL_COURSE_DATA);
       }
       setLoadingConfig(false);
     }, (error) => {
@@ -78,12 +75,18 @@ const App: React.FC = () => {
 
   const handleUpdateCourse = async (newData: CourseConfig) => {
     setCourseData(newData);
-    // Save to Firestore
+    // Save to Firestore via Server API to bypass client-side auth limits and ensure "total control"
     try {
-      const configRef = doc(db, 'config', 'main');
-      await setDoc(configRef, newData);
+      const response = await fetch('/api/admin/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newData)
+      });
+      if (!response.ok) throw new Error('Failed to save config');
     } catch (error) {
       console.error("Error saving config:", error);
+      // We don't revert here to avoid the "returning automatically" frustration, 
+      // but in a production app you might want to show an error toast.
     }
   };
 

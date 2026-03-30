@@ -112,13 +112,13 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
   const fetchStudents = async () => {
     setLoadingStudents(true);
     try {
-      const q = query(collection(db, 'users'));
-      const querySnapshot = await getDocs(q);
-      const studentList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setStudents(studentList);
+      const response = await fetch('/api/admin/students');
+      if (response.ok) {
+        const studentList = await response.json();
+        setStudents(studentList);
+      } else {
+        console.error("Failed to fetch students");
+      }
     } catch (error) {
       console.error("Error fetching students:", error);
     } finally {
@@ -136,14 +136,17 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
     if (!newStudentEmail) return;
     const email = newStudentEmail.toLowerCase().trim();
     try {
-      await setDoc(doc(db, 'users', email), {
-        email,
-        products: ['manual_entry'],
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
+      const response = await fetch('/api/admin/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
       });
-      setNewStudentEmail('');
-      fetchStudents();
+      if (response.ok) {
+        setNewStudentEmail('');
+        fetchStudents();
+      } else {
+        alert("Erro ao adicionar aluno");
+      }
     } catch (error) {
       console.error("Error adding student:", error);
       alert("Erro ao adicionar aluno");
@@ -156,8 +159,12 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
       message: `Tem certeza que deseja remover o acesso de ${email}?`,
       onConfirm: async () => {
         try {
-          await deleteDoc(doc(db, 'users', email));
-          fetchStudents();
+          const response = await fetch(`/api/admin/students/${email}`, {
+            method: 'DELETE'
+          });
+          if (response.ok) {
+            fetchStudents();
+          }
         } catch (error) {
           console.error("Error deleting student:", error);
         }
@@ -177,13 +184,13 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
     onConfirm: () => void;
   } | null>(null);
 
-  // Sync formData if course prop changes from outside
-  React.useEffect(() => {
+  // Initial sync of formData when course prop is available
+  useEffect(() => {
     setFormData({
       ...course,
       notifications: course.notifications || []
     });
-  }, [course]);
+  }, []);
   const [expandedModule, setExpandedModule] = useState<string | null>(formData.modules[0]?.id || null);
   const [expandedLessonSections, setExpandedLessonSections] = useState<Record<string, string | null>>({});
   

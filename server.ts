@@ -312,6 +312,111 @@ async function startServer() {
     res.json({ success: true, sentTo: count });
   });
 
+  // --- Config Endpoints ---
+  app.post('/api/admin/config', async (req, res) => {
+    // Check if user is admin
+    const token = req.cookies.nexus_session;
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+    
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+      if (decoded.email !== 'cdsmarketingg@gmail.com') {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+    } catch (e) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const configData = req.body;
+    try {
+      await db.collection('config').doc('main').set({
+        ...configData,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error saving config:', error);
+      res.status(500).json({ error: 'Failed to save configuration' });
+    }
+  });
+
+  // --- Student Endpoints ---
+  app.get('/api/admin/students', async (req, res) => {
+    const token = req.cookies.nexus_session;
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+    
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+      if (decoded.email !== 'cdsmarketingg@gmail.com') {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+    } catch (e) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+      const snapshot = await db.collection('users').get();
+      const students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      res.json(students);
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      res.status(500).json({ error: 'Failed to fetch students' });
+    }
+  });
+
+  app.post('/api/admin/students', async (req, res) => {
+    const token = req.cookies.nexus_session;
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+    
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+      if (decoded.email !== 'cdsmarketingg@gmail.com') {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+    } catch (e) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { email, products } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    try {
+      await db.collection('users').doc(email.toLowerCase().trim()).set({
+        email: email.toLowerCase().trim(),
+        products: products || ['manual_entry'],
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error adding student:', error);
+      res.status(500).json({ error: 'Failed to add student' });
+    }
+  });
+
+  app.delete('/api/admin/students/:email', async (req, res) => {
+    const token = req.cookies.nexus_session;
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+    
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+      if (decoded.email !== 'cdsmarketingg@gmail.com') {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+    } catch (e) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { email } = req.params;
+    try {
+      await db.collection('users').doc(email).delete();
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting student:', error);
+      res.status(500).json({ error: 'Failed to delete student' });
+    }
+  });
+
   // --- Bunny.net List Files ---
   app.get('/api/admin/files', async (req, res) => {
     // Check if user is admin
