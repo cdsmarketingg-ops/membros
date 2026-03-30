@@ -379,7 +379,7 @@ async function startServer() {
 
     const storageZone = process.env.BUNNY_STORAGE_ZONE || 'teste-aula';
     const accessKey = process.env.BUNNY_ACCESS_KEY || '22baafe9-93d9-4501-b18ebad00488-7e0a-4567';
-    const pullZoneUrl = process.env.BUNNY_PULL_ZONE_URL || 'https://teste-aula.b-cdn.net';
+    const pullZoneUrl = process.env.BUNNY_PULL_ZONE_URL || 'https://aevopro.b-cdn.net';
     const region = process.env.BUNNY_REGION || 'br';
 
     if (!storageZone || !accessKey) {
