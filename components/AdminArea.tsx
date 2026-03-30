@@ -89,7 +89,12 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
   const fetchBunnyFiles = async () => {
     setLoadingBunny(true);
     try {
-      const response = await fetch('/api/admin/files');
+      const token = localStorage.getItem('nexus_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const response = await fetch('/api/admin/files', { headers });
       if (response.ok) {
         const data = await response.json();
         setBunnyFiles(data);
@@ -112,7 +117,12 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
   const fetchStudents = async () => {
     setLoadingStudents(true);
     try {
-      const response = await fetch('/api/admin/students');
+      const token = localStorage.getItem('nexus_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const response = await fetch('/api/admin/students', { headers });
       if (response.ok) {
         const studentList = await response.json();
         setStudents(studentList);
@@ -136,9 +146,14 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
     if (!newStudentEmail) return;
     const email = newStudentEmail.toLowerCase().trim();
     try {
+      const token = localStorage.getItem('nexus_token');
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       const response = await fetch('/api/admin/students', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ email })
       });
       if (response.ok) {
@@ -159,8 +174,14 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
       message: `Tem certeza que deseja remover o acesso de ${email}?`,
       onConfirm: async () => {
         try {
+          const token = localStorage.getItem('nexus_token');
+          const headers: HeadersInit = {};
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
           const response = await fetch(`/api/admin/students/${email}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers
           });
           if (response.ok) {
             fetchStudents();
@@ -213,7 +234,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
 
     setIsSendingNotif(true);
     try {
-      const token = localStorage.getItem('nexus_admin_token');
+      const token = localStorage.getItem('nexus_token');
       const response = await fetch('/api/admin/notify', {
         method: 'POST',
         headers: {

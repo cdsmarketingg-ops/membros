@@ -41,14 +41,25 @@ const App: React.FC = () => {
 
   const checkSession = async () => {
     try {
-      const response = await fetch('/api/auth/session');
+      const token = localStorage.getItem('nexus_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch('/api/auth/session', { headers });
       const data = await response.json();
       if (data.authenticated) {
         setIsAuthenticated(true);
         setUserEmail(data.email);
         setUserProducts(data.products || []);
+        // If server returned a new token or confirmed the current one
+        if (data.token) {
+          localStorage.setItem('nexus_token', data.token);
+        }
       } else {
         setIsAuthenticated(false);
+        localStorage.removeItem('nexus_token');
       }
     } catch (e) {
       setIsAuthenticated(false);
@@ -66,6 +77,7 @@ const App: React.FC = () => {
       await fetch('/api/auth/logout', { method: 'POST' });
       setIsAuthenticated(false);
       setUserEmail(null);
+      localStorage.removeItem('nexus_token');
     } catch (e) {
       console.error('Logout failed', e);
     }
@@ -77,9 +89,15 @@ const App: React.FC = () => {
     setCourseData(newData);
     // Save to Firestore via Server API to bypass client-side auth limits and ensure "total control"
     try {
+      const token = localStorage.getItem('nexus_token');
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/admin/config', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(newData)
       });
       if (!response.ok) throw new Error('Failed to save config');

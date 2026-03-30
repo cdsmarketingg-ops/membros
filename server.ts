@@ -174,9 +174,21 @@ async function startServer() {
 
   // --- Auth Endpoints ---
 
+  // Helper to get token from cookie or header
+  const getToken = (req: express.Request) => {
+    const cookieToken = req.cookies.nexus_session;
+    if (cookieToken) return cookieToken;
+    
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      return authHeader.substring(7);
+    }
+    return null;
+  };
+
   // Check current session
   app.get('/api/auth/session', async (req, res) => {
-    const token = req.cookies.nexus_session;
+    const token = getToken(req);
     if (!token) return res.status(401).json({ authenticated: false });
 
     try {
@@ -187,7 +199,8 @@ async function startServer() {
       res.json({ 
         authenticated: true, 
         email: decoded.email,
-        products: products
+        products: products,
+        token: token // Return token back for client to store if needed
       });
     } catch (e) {
       res.status(401).json({ authenticated: false });
@@ -202,6 +215,7 @@ async function startServer() {
     const normalizedEmail = email.toLowerCase().trim();
     
     try {
+      // For the admin email, we allow login even if not in DB yet for initial setup
       const userDoc = await db.collection('users').doc(normalizedEmail).get();
       const products = userDoc.exists ? (userDoc.data()?.products || []) : [];
       
@@ -220,7 +234,8 @@ async function startServer() {
         res.json({ 
           success: true, 
           email: normalizedEmail,
-          products: products
+          products: products,
+          token: token // Return token for localStorage fallback
         });
       } else {
         res.status(403).json({ error: 'Email não autorizado. Verifique se sua compra foi aprovada.' });
@@ -273,7 +288,7 @@ async function startServer() {
 
   // --- Real-time Notifications ---
   app.post('/api/admin/notify', (req, res) => {
-    const token = req.cookies.nexus_session;
+    const token = getToken(req);
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     
     try {
@@ -315,7 +330,7 @@ async function startServer() {
   // --- Config Endpoints ---
   app.post('/api/admin/config', async (req, res) => {
     // Check if user is admin
-    const token = req.cookies.nexus_session;
+    const token = getToken(req);
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     
     try {
@@ -329,10 +344,12 @@ async function startServer() {
 
     const configData = req.body;
     try {
+      console.log('Saving config to database:', firebaseConfig.firestoreDatabaseId);
       await db.collection('config').doc('main').set({
         ...configData,
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
+      console.log('Config saved successfully');
       res.json({ success: true });
     } catch (error) {
       console.error('Error saving config:', error);
@@ -342,7 +359,7 @@ async function startServer() {
 
   // --- Student Endpoints ---
   app.get('/api/admin/students', async (req, res) => {
-    const token = req.cookies.nexus_session;
+    const token = getToken(req);
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     
     try {
@@ -365,7 +382,7 @@ async function startServer() {
   });
 
   app.post('/api/admin/students', async (req, res) => {
-    const token = req.cookies.nexus_session;
+    const token = getToken(req);
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     
     try {
@@ -395,7 +412,7 @@ async function startServer() {
   });
 
   app.delete('/api/admin/students/:email', async (req, res) => {
-    const token = req.cookies.nexus_session;
+    const token = getToken(req);
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     
     try {
@@ -420,7 +437,7 @@ async function startServer() {
   // --- Bunny.net List Files ---
   app.get('/api/admin/files', async (req, res) => {
     // Check if user is admin
-    const token = req.cookies.nexus_session;
+    const token = getToken(req);
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     
     try {
@@ -466,7 +483,7 @@ async function startServer() {
   app.post('/api/admin/upload', upload.single('file'), async (req, res) => {
     console.log('--- NOVA TENTATIVA DE UPLOAD RECEBIDA ---');
     // Check if user is admin
-    const token = req.cookies.nexus_session;
+    const token = getToken(req);
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     
     try {
