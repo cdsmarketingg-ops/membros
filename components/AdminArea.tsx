@@ -190,7 +190,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
       ...course,
       notifications: course.notifications || []
     });
-  }, []);
+  }, [course]);
   const [expandedModule, setExpandedModule] = useState<string | null>(formData.modules[0]?.id || null);
   const [expandedLessonSections, setExpandedLessonSections] = useState<Record<string, string | null>>({});
   
