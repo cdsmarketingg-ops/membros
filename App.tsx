@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { CourseConfig, AppView } from './types';
 import { INITIAL_COURSE_DATA } from './constants';
@@ -7,15 +6,15 @@ import AdminArea from './components/AdminArea';
 import Login from './components/Login';
 import { ChevronLeft, User, Bell, Search, Settings, LogOut, Loader2 } from 'lucide-react';
 
-
-
-
 const App: React.FC = () => {
+
   const [view, setView] = useState<AppView>('student');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userProducts, setUserProducts] = useState<string[]>([]);
   const [loadingConfig, setLoadingConfig] = useState(true);
+
+  // ✅ ÚNICO estado do curso (fonte da verdade)
   const [courseData, setCourseData] = useState<CourseConfig>(INITIAL_COURSE_DATA);
 
   // Load course config from Firestore
@@ -104,6 +103,7 @@ useEffect(() => {
     console.log('🔥 RELOAD:', dataReload);
 
     setCourseData(dataReload);
+    
 
   } catch (error) {
     console.error('Erro saving config:', error);
