@@ -6,7 +6,8 @@ import StudentArea from './components/StudentArea';
 import AdminArea from './components/AdminArea';
 import Login from './components/Login';
 import { ChevronLeft, User, Bell, Search, Settings, LogOut, Loader2 } from 'lucide-react';
-import { db } from './src/firebase';
+
+
 
 
 const App: React.FC = () => {
@@ -84,10 +85,6 @@ useEffect(() => {
   setCourseData(newData);
 
   try {
-   const handleUpdateCourse = async (newData: CourseConfig) => {
-  setCourseData(newData);
-
-  try {
     const response = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
       method: 'POST',
       headers: {
@@ -102,20 +99,17 @@ useEffect(() => {
 
     if (!response.ok) throw new Error('Erro ao salvar');
 
-    // 🔥 força atualização imediata
-    setCourseData(newData);
-
   } catch (error) {
     console.error('Erro saving config:', error);
   }
 };
   if (isAuthenticated === null || loadingConfig) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <Loader2 className="text-amber-500 animate-spin" size={40} />
-      </div>
-    );
-  }
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <Loader2 className="text-amber-500 animate-spin" size={40} />
+    </div>
+  );
+}
 
   if (!isAuthenticated) {
     return <Login onLoginSuccess={handleLoginSuccess} />;
