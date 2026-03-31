@@ -1300,7 +1300,15 @@ useEffect(() => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 <div className="space-y-3">
                   <label className="text-xs font-black text-white/40 uppercase tracking-widest">Nome do Treinamento</label>
-                  <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-4 md:px-5 py-3 md:py-4 text-white focus:border-amber-500 outline-none text-sm md:text-base" />
+                  <input 
+  type="text" 
+  value={formData.title || ''} 
+  onChange={(e) => setFormData({
+    ...formData,
+    title: e.target.value
+  })} 
+  className="w-full bg-black border border-white/10 rounded-lg px-4 md:px-5 py-3 md:py-4 text-white focus:border-amber-500 outline-none text-sm md:text-base" 
+/>
                 </div>
                 <div className="space-y-3">
                   <label className="text-xs font-black text-white/40 uppercase tracking-widest">Instrutor</label>
