@@ -185,12 +185,25 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
   } | null>(null);
 
   // Initial sync of formData when course prop is available
-  useEffect(() => {
-    setFormData({
-      ...course,
-      notifications: course.notifications || []
-    });
-  }, []);
+ useEffect(() => {
+  const loadConfig = async () => {
+    try {
+      const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
+      const data = await res.json();
+
+      if (data && Object.keys(data).length > 0) {
+        setFormData({
+          ...data,
+          notifications: data.notifications || []
+        });
+      }
+    } catch (err) {
+      console.error('Erro ao carregar config:', err);
+    }
+  };
+
+  loadConfig();
+}, []);
   const [expandedModule, setExpandedModule] = useState<string | null>(formData.modules[0]?.id || null);
   const [expandedLessonSections, setExpandedLessonSections] = useState<Record<string, string | null>>({});
   
@@ -238,11 +251,30 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
     }
   };
 
-  const handleSave = () => {
-    onUpdate(formData);
+  const handleSave = async () => {
+  try {
+    const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.error || 'Erro ao salvar');
+    }
+
     setShowSaveToast(true);
     setTimeout(() => setShowSaveToast(false), 3000);
-  };
+
+  } catch (err) {
+    console.error('Erro ao salvar config:', err);
+    alert('Erro ao salvar no servidor');
+  }
+};
 
   const toggleLessonSection = (lessonId: string, section: string) => {
     setExpandedLessonSections(prev => ({
