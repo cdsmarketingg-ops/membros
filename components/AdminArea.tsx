@@ -180,10 +180,6 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
     });
   };
 
-  const [formData, setFormData] = useState<CourseConfig>({
-    ...course,
-    notifications: course.notifications || []
-  });
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<{
     title: string;
@@ -191,30 +187,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
     onConfirm: () => void;
   } | null>(null);
 
-  // Initial sync of formData when course prop is available
-useEffect(() => {
-  const loadConfig = async () => {
-    try {
-      const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
-      const data = await res.json();
-
-      // 🔥 só atualiza se vier algo
-      if (data && Object.keys(data).length > 0) {
-        setFormData(prev => ({
-  ...prev,
-  ...data,
-  notifications: data.notifications || []
-}));
-      }
-
-    } catch (err) {
-      console.error('Erro ao carregar config:', err);
-    }
-  };
-
-  loadConfig();
-}, []);
-  const [expandedModule, setExpandedModule] = useState<string | null>(formData.modules[0]?.id || null);
+  const [expandedModule, setExpandedModule] = useState<string | null>(course.modules[0]?.id || null);
   const [expandedLessonSections, setExpandedLessonSections] = useState<Record<string, string | null>>({});
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -261,33 +234,6 @@ useEffect(() => {
     }
   };
 
- const handleSave = async () => {
-  console.log("🔥 HANDLE SAVE DISPARADO", formData);
-
-  try {
-    const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData)
-    });
-
-    const result = await res.json();
-    console.log("✅ RESPOSTA API:", result);
-
-    if (!res.ok) {
-      throw new Error(result.error || 'Erro ao salvar');
-    }
-
-    alert("✅ Salvo com sucesso!");
-
-  } catch (err) {
-    console.error('❌ Erro ao salvar config:', err);
-    alert('Erro ao salvar no servidor');
-  }
-};
-
   const toggleLessonSection = (lessonId: string, section: string) => {
     setExpandedLessonSections(prev => ({
       ...prev,
@@ -303,7 +249,7 @@ useEffect(() => {
             {/* MODULE HEADER BAR */}
             <div onClick={() => setExpandedModule(expandedModule === mod.id ? null : mod.id)} className="p-4 sm:p-6 flex items-center justify-between cursor-pointer hover:bg-white/5 bg-black/20">
               <div className="flex items-center gap-3 sm:gap-6 overflow-hidden">
-                <div className={`flex-shrink-0 rounded object-cover ring-1 ring-white/10 overflow-hidden ${formData.moduleThumbnailOrientation === 'horizontal' ? 'w-16 sm:w-24 h-10 sm:h-14' : 'w-8 sm:w-10 h-10 sm:h-14'}`}>
+                <div className={`flex-shrink-0 rounded object-cover ring-1 ring-white/10 overflow-hidden ${course.moduleThumbnailOrientation === 'horizontal' ? 'w-16 sm:w-24 h-10 sm:h-14' : 'w-8 sm:w-10 h-10 sm:h-14'}`}>
                   {mod.thumbnailUrl ? (
                     <img src={mod.thumbnailUrl} className="w-full h-full object-cover" alt={mod.title} />
                   ) : (
@@ -657,10 +603,10 @@ useEffect(() => {
   const insertHtmlAtCursor = (moduleId: string, lessonId: string, htmlToInsert: string, courseId?: string) => {
     let lesson: Lesson | undefined;
     if (courseId) {
-      const upsell = formData.upsellCourses.find(u => u.id === courseId);
+      const upsell = course.upsellCourses.find(u => u.id === courseId);
       lesson = upsell?.modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
     } else {
-      lesson = formData.modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
+      lesson = course.modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
     }
     
     if (!lesson) return;
@@ -678,38 +624,38 @@ useEffect(() => {
     };
 
     if (courseId) {
-      setFormData(prev => ({
-        ...prev,
-        upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? { ...u, modules: [...u.modules, newModule] } : u)
-      }));
+      onUpdate({
+        ...course,
+        upsellCourses: course.upsellCourses.map(u => u.id === courseId ? { ...u, modules: [...u.modules, newModule] } : u)
+      });
     } else {
-      setFormData(prev => ({ ...prev, modules: [...prev.modules, newModule] }));
+      onUpdate({ ...course, modules: [...course.modules, newModule] });
     }
     setExpandedModule(newModule.id);
   };
 
   const updateModule = (id: string, updates: Partial<Module>, courseId?: string) => {
     if (courseId) {
-      setFormData(prev => ({
-        ...prev,
-        upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
+      onUpdate({
+        ...course,
+        upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
           ...u,
           modules: u.modules.map(m => m.id === id ? { ...m, ...updates } : m)
         } : u)
-      }));
+      });
     } else {
-      setFormData(prev => ({
-        ...prev,
-        modules: prev.modules.map(m => m.id === id ? { ...m, ...updates } : m)
-      }));
+      onUpdate({
+        ...course,
+        modules: course.modules.map(m => m.id === id ? { ...m, ...updates } : m)
+      });
     }
   };
 
   const updateUpsell = (id: string, updates: any) => {
-    setFormData(prev => ({
-      ...prev,
-      upsellCourses: prev.upsellCourses.map(u => u.id === id ? { ...u, ...updates } : u)
-    }));
+    onUpdate({
+      ...course,
+      upsellCourses: course.upsellCourses.map(u => u.id === id ? { ...u, ...updates } : u)
+    });
   };
 
   const deleteModule = (id: string, courseId?: string) => {
@@ -718,18 +664,18 @@ useEffect(() => {
       message: 'Tem certeza que deseja excluir este módulo e todas as suas aulas? Esta ação não pode ser desfeita.',
       onConfirm: () => {
         if (courseId) {
-          setFormData(prev => ({
-            ...prev,
-            upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
+          onUpdate({
+            ...course,
+            upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
               ...u,
               modules: u.modules.filter(m => m.id !== id)
             } : u)
-          }));
+          });
         } else {
-          setFormData(prev => ({
-            ...prev,
-            modules: prev.modules.filter(m => m.id !== id)
-          }));
+          onUpdate({
+            ...course,
+            modules: course.modules.filter(m => m.id !== id)
+          });
         }
         setConfirmDelete(null);
       }
@@ -749,9 +695,9 @@ useEffect(() => {
     };
 
     if (courseId) {
-      setFormData(prev => ({
-        ...prev,
-        upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
+      onUpdate({
+        ...course,
+        upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
           ...u,
           modules: u.modules.map(m => {
             if (m.id === moduleId) {
@@ -760,25 +706,25 @@ useEffect(() => {
             return m;
           })
         } : u)
-      }));
+      });
     } else {
-      setFormData(prev => ({
-        ...prev,
-        modules: prev.modules.map(m => {
+      onUpdate({
+        ...course,
+        modules: course.modules.map(m => {
           if (m.id === moduleId) {
             return { ...m, lessons: [...m.lessons, { ...newLesson, thumbnailUrl: m.thumbnailUrl }] };
           }
           return m;
         })
-      }));
+      });
     }
   };
 
   const updateLesson = (moduleId: string, lessonId: string, updates: Partial<Lesson>, courseId?: string) => {
     if (courseId) {
-      setFormData(prev => ({
-        ...prev,
-        upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
+      onUpdate({
+        ...course,
+        upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
           ...u,
           modules: u.modules.map(m => {
             if (m.id === moduleId) {
@@ -790,11 +736,11 @@ useEffect(() => {
             return m;
           })
         } : u)
-      }));
+      });
     } else {
-      setFormData(prev => ({
-        ...prev,
-        modules: prev.modules.map(m => {
+      onUpdate({
+        ...course,
+        modules: course.modules.map(m => {
           if (m.id === moduleId) {
             return {
               ...m,
@@ -803,7 +749,7 @@ useEffect(() => {
           }
           return m;
         })
-      }));
+      });
     }
   };
 
@@ -813,9 +759,9 @@ useEffect(() => {
       message: 'Tem certeza que deseja excluir esta aula permanentemente?',
       onConfirm: () => {
         if (courseId) {
-          setFormData(prev => ({
-            ...prev,
-            upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
+          onUpdate({
+            ...course,
+            upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
               ...u,
               modules: u.modules.map(m => {
                 if (m.id === moduleId) {
@@ -824,17 +770,17 @@ useEffect(() => {
                 return m;
               })
             } : u)
-          }));
+          });
         } else {
-          setFormData(prev => ({
-            ...prev,
-            modules: prev.modules.map(m => {
+          onUpdate({
+            ...course,
+            modules: course.modules.map(m => {
               if (m.id === moduleId) {
                 return { ...m, lessons: m.lessons.filter(l => l.id !== lessonId) };
               }
               return m;
             })
-          }));
+          });
         }
         setConfirmDelete(null);
       }
@@ -843,9 +789,9 @@ useEffect(() => {
 
   const updateMaterial = (moduleId: string, lessonId: string, materialId: string, updates: Partial<Material>, courseId?: string) => {
     if (courseId) {
-      setFormData(prev => ({
-        ...prev,
-        upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
+      onUpdate({
+        ...course,
+        upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
           ...u,
           modules: u.modules.map(m => {
             if (m.id === moduleId) {
@@ -865,11 +811,11 @@ useEffect(() => {
             return m;
           })
         } : u)
-      }));
+      });
     } else {
-      setFormData(prev => ({
-        ...prev,
-        modules: prev.modules.map(m => {
+      onUpdate({
+        ...course,
+        modules: course.modules.map(m => {
           if (m.id === moduleId) {
             return {
               ...m,
@@ -886,7 +832,7 @@ useEffect(() => {
           }
           return m;
         })
-      }));
+      });
     }
   };
 
@@ -896,9 +842,9 @@ useEffect(() => {
       message: 'Deseja remover este material de apoio?',
       onConfirm: () => {
         if (courseId) {
-          setFormData(prev => ({
-            ...prev,
-            upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
+          onUpdate({
+            ...course,
+            upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
               ...u,
               modules: u.modules.map(m => {
                 if (m.id === moduleId) {
@@ -918,11 +864,11 @@ useEffect(() => {
                 return m;
               })
             } : u)
-          }));
+          });
         } else {
-          setFormData(prev => ({
-            ...prev,
-            modules: prev.modules.map(m => {
+          onUpdate({
+            ...course,
+            modules: course.modules.map(m => {
               if (m.id === moduleId) {
                 return {
                   ...m,
@@ -939,7 +885,7 @@ useEffect(() => {
               }
               return m;
             })
-          }));
+          });
         }
         setConfirmDelete(null);
       }
@@ -968,11 +914,11 @@ useEffect(() => {
   };
 
   const uploadToBunny = async (file: File): Promise<string | null> => {
-    // Bunny.net Config from formData
-    const storageZoneForUpload = formData.bunnyStorageZone?.trim() || 'teste-aula';
-    let accessKey = formData.bunnyAccessKey?.trim();
-    const pullZoneUrl = formData.bunnyPullZoneUrl?.trim()?.replace(/\/$/, '');
-    let region = (formData.bunnyRegion || 'br')?.trim(); 
+    // Bunny.net Config from course
+    const storageZoneForUpload = course.bunnyStorageZone?.trim() || 'teste-aula';
+    let accessKey = course.bunnyAccessKey?.trim();
+    const pullZoneUrl = course.bunnyPullZoneUrl?.trim()?.replace(/\/$/, '');
+    let region = (course.bunnyRegion || 'br')?.trim(); 
 
     // Sanitize access key (remove spaces, hidden chars)
     accessKey = accessKey?.replace(/[^a-f0-9-]/gi, '');
@@ -1043,9 +989,9 @@ useEffect(() => {
       return false;
     }
 
-    const storageZone = formData.bunnyStorageZone?.trim() || 'teste-aula';
-    let accessKey = formData.bunnyAccessKey?.trim();
-    let region = (formData.bunnyRegion || 'br')?.trim();
+    const storageZone = course.bunnyStorageZone?.trim() || 'teste-aula';
+    let accessKey = course.bunnyAccessKey?.trim();
+    let region = (course.bunnyRegion || 'br')?.trim();
     
     accessKey = accessKey?.replace(/[^a-f0-9-]/gi, '');
     
@@ -1116,9 +1062,9 @@ useEffect(() => {
 
     if (imageUrl) {
       if (target.type === 'logo') {
-        setFormData(prev => ({ ...prev, logoUrl: imageUrl }));
+        onUpdate({ ...course, logoUrl: imageUrl });
       } else if (target.type === 'banner') {
-        setFormData(prev => ({ ...prev, bannerUrl: imageUrl }));
+        onUpdate({ ...course, bannerUrl: imageUrl });
       } else if (target.type === 'module' && target.modId) {
         updateModule(target.modId, { thumbnailUrl: imageUrl }, target.courseId);
       } else if (target.type === 'lesson' && target.modId && target.lessonId) {
@@ -1143,10 +1089,10 @@ useEffect(() => {
 
     let mod: Module | undefined;
     if (target.courseId) {
-      const upsell = formData.upsellCourses.find(u => u.id === target.courseId);
+      const upsell = course.upsellCourses.find(u => u.id === target.courseId);
       mod = upsell?.modules.find(m => m.id === target.modId);
     } else {
-      mod = formData.modules.find(m => m.id === target.modId);
+      mod = course.modules.find(m => m.id === target.modId);
     }
     
     const lesson = mod?.lessons.find(l => l.id === target.lessonId);
@@ -1188,9 +1134,9 @@ useEffect(() => {
 
     if (newMaterials.length > 0) {
       if (target.courseId) {
-        setFormData(prev => ({
-          ...prev,
-          upsellCourses: prev.upsellCourses.map(u => u.id === target.courseId ? {
+        onUpdate({
+          ...course,
+          upsellCourses: course.upsellCourses.map(u => u.id === target.courseId ? {
             ...u,
             modules: u.modules.map(m => m.id === target.modId ? {
               ...m,
@@ -1200,18 +1146,18 @@ useEffect(() => {
               } : l)
             } : m)
           } : u)
-        }));
+        });
       } else {
-        setFormData(prev => ({
-          ...prev,
-          modules: prev.modules.map(m => m.id === target.modId ? {
+        onUpdate({
+          ...course,
+          modules: course.modules.map(m => m.id === target.modId ? {
             ...m,
             lessons: m.lessons.map(l => l.id === target.lessonId ? { 
               ...l, 
               materials: [...(l.materials || []), ...newMaterials] 
             } : l)
           } : m)
-        }));
+        });
       }
     }
     
@@ -1262,7 +1208,7 @@ useEffect(() => {
           <p className="text-white/40 mt-1 md:mt-2 font-medium text-sm md:text-base">Personalize a experiência premium dos seus alunos.</p>
         </div>
         <button 
-          onClick={handleSave}
+          onClick={() => onUpdate(course)}
           className="w-full md:w-auto bg-amber-500 text-black px-8 md:px-12 py-3 md:py-4 rounded font-black hover:bg-white transition-all shadow-xl shadow-amber-500/10 flex items-center justify-center gap-3 text-sm md:text-base"
         >
           <Save size={20} /> SALVAR ALTERAÇÕES
@@ -1301,18 +1247,18 @@ useEffect(() => {
                 <div className="space-y-3">
                   <label className="text-xs font-black text-white/40 uppercase tracking-widest">Nome do Treinamento</label>
                   <input 
-  type="text" 
-  value={formData.title || ''} 
-  onChange={(e) => setFormData({
-    ...formData,
-    title: e.target.value
-  })} 
-  className="w-full bg-black border border-white/10 rounded-lg px-4 md:px-5 py-3 md:py-4 text-white focus:border-amber-500 outline-none text-sm md:text-base" 
-/>
+                    type="text" 
+                    value={course.title || ''} 
+                    onChange={(e) => onUpdate({
+                      ...course,
+                      title: e.target.value
+                    })} 
+                    className="w-full bg-black border border-white/10 rounded-lg px-4 md:px-5 py-3 md:py-4 text-white focus:border-amber-500 outline-none text-sm md:text-base" 
+                  />
                 </div>
                 <div className="space-y-3">
                   <label className="text-xs font-black text-white/40 uppercase tracking-widest">Instrutor</label>
-                  <input type="text" value={formData.instructorName} onChange={(e) => setFormData({...formData, instructorName: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-4 md:px-5 py-3 md:py-4 text-white focus:border-amber-500 outline-none text-sm md:text-base" />
+                  <input type="text" value={course.instructorName} onChange={(e) => onUpdate({...course, instructorName: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-4 md:px-5 py-3 md:py-4 text-white focus:border-amber-500 outline-none text-sm md:text-base" />
                 </div>
               </div>
 
@@ -1321,14 +1267,14 @@ useEffect(() => {
                   <label className="text-xs font-black text-white/40 uppercase tracking-widest">Idioma do Aluno</label>
                   <div className="flex gap-2 md:gap-4">
                     <button 
-                      onClick={() => setFormData({...formData, language: 'pt'})}
-                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${formData.language === 'pt' || !formData.language ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
+                      onClick={() => onUpdate({...course, language: 'pt'})}
+                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${course.language === 'pt' || !course.language ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
                     >
                       🇧🇷 <span className="hidden xs:inline">PORTUGUÊS</span><span className="xs:hidden">PT</span>
                     </button>
                     <button 
-                      onClick={() => setFormData({...formData, language: 'es'})}
-                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${formData.language === 'es' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
+                      onClick={() => onUpdate({...course, language: 'es'})}
+                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${course.language === 'es' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
                     >
                       🇪🇸 <span className="hidden xs:inline">ESPAÑOL</span><span className="xs:hidden">ES</span>
                     </button>
@@ -1338,14 +1284,14 @@ useEffect(() => {
                   <label className="text-xs font-black text-white/40 uppercase tracking-widest">Orientação da Thumbnail</label>
                   <div className="flex gap-2 md:gap-4">
                     <button 
-                      onClick={() => setFormData({...formData, moduleThumbnailOrientation: 'horizontal'})}
-                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${formData.moduleThumbnailOrientation === 'horizontal' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
+                      onClick={() => onUpdate({...course, moduleThumbnailOrientation: 'horizontal'})}
+                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${course.moduleThumbnailOrientation === 'horizontal' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
                     >
                       <RectangleHorizontal size={14} /> <span className="hidden xs:inline">HORIZONTAL</span><span className="xs:hidden">HORIZ</span>
                     </button>
                     <button 
-                      onClick={() => setFormData({...formData, moduleThumbnailOrientation: 'vertical'})}
-                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${formData.moduleThumbnailOrientation === 'vertical' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
+                      onClick={() => onUpdate({...course, moduleThumbnailOrientation: 'vertical'})}
+                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${course.moduleThumbnailOrientation === 'vertical' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
                     >
                       <Square size={14} /> <span className="hidden xs:inline">VERTICAL</span><span className="xs:hidden">VERT</span>
                     </button>
@@ -1360,8 +1306,8 @@ useEffect(() => {
                     <label className="text-[10px] font-black text-white/20 uppercase tracking-widest">Storage Zone Name</label>
                     <input 
                       type="text" 
-                      value={formData.bunnyStorageZone} 
-                      onChange={(e) => setFormData({...formData, bunnyStorageZone: e.target.value})} 
+                      value={course.bunnyStorageZone} 
+                      onChange={(e) => onUpdate({...course, bunnyStorageZone: e.target.value})} 
                       className="w-full bg-black border border-white/10 rounded px-4 py-3 text-white text-xs outline-none focus:border-amber-500" 
                       placeholder="ex: teste-aula"
                     />
@@ -1370,8 +1316,8 @@ useEffect(() => {
                     <label className="text-[10px] font-black text-white/20 uppercase tracking-widest">Storage Access Key</label>
                     <input 
                       type="password" 
-                      value={formData.bunnyAccessKey} 
-                      onChange={(e) => setFormData({...formData, bunnyAccessKey: e.target.value})} 
+                      value={course.bunnyAccessKey} 
+                      onChange={(e) => onUpdate({...course, bunnyAccessKey: e.target.value})} 
                       className="w-full bg-black border border-white/10 rounded px-4 py-3 text-white text-xs outline-none focus:border-amber-500" 
                       placeholder="Sua chave de acesso"
                     />
@@ -1380,8 +1326,8 @@ useEffect(() => {
                     <label className="text-[10px] font-black text-white/20 uppercase tracking-widest">Pull Zone Hostname (URL)</label>
                     <input 
                       type="text" 
-                      value={formData.bunnyPullZoneUrl} 
-                      onChange={(e) => setFormData({...formData, bunnyPullZoneUrl: e.target.value})} 
+                      value={course.bunnyPullZoneUrl} 
+                      onChange={(e) => onUpdate({...course, bunnyPullZoneUrl: e.target.value})} 
                       className="w-full bg-black border border-white/10 rounded px-4 py-3 text-white text-xs outline-none focus:border-amber-500" 
                       placeholder="ex: https://teste-aula.b-cdn.net"
                     />
@@ -1390,8 +1336,8 @@ useEffect(() => {
                     <label className="text-[10px] font-black text-white/20 uppercase tracking-widest">Storage Region (ex: br, ny, sg ou vazio)</label>
                     <input 
                       type="text" 
-                      value={formData.bunnyRegion} 
-                      onChange={(e) => setFormData({...formData, bunnyRegion: e.target.value})} 
+                      value={course.bunnyRegion} 
+                      onChange={(e) => onUpdate({...course, bunnyRegion: e.target.value})} 
                       className="w-full bg-black border border-white/10 rounded px-4 py-3 text-white text-xs outline-none focus:border-amber-500" 
                       placeholder="br"
                     />
@@ -1470,7 +1416,7 @@ useEffect(() => {
 
           {activeTab === 'modules' && (
             <div className="space-y-8">
-              {renderModuleList(formData.modules)}
+              {renderModuleList(course.modules)}
             </div>
           )}
 
@@ -1483,13 +1429,13 @@ useEffect(() => {
                     <label className="text-xs font-black text-white/40 uppercase tracking-widest">Logo Principal (PNG/SVG)</label>
                     <div className="flex flex-col gap-4">
                       <div className="w-32 h-32 rounded-2xl bg-black border border-white/5 p-4 flex items-center justify-center shadow-inner overflow-hidden">
-                        <img src={formData.logoUrl} className="max-w-full max-h-full object-contain" alt="Logo preview" />
+                        <img src={course.logoUrl} className="max-w-full max-h-full object-contain" alt="Logo preview" />
                       </div>
                       <div className="flex flex-col sm:flex-row gap-4">
                         <input 
                           type="text" 
-                          value={formData.logoUrl} 
-                          onChange={(e) => setFormData({...formData, logoUrl: e.target.value})} 
+                          value={course.logoUrl} 
+                          onChange={(e) => onUpdate({...course, logoUrl: e.target.value})} 
                           className="flex-1 bg-black border border-white/10 rounded px-4 py-2 text-white outline-none text-[10px]" 
                           placeholder="URL da Logo"
                         />
@@ -1500,15 +1446,15 @@ useEffect(() => {
                           >
                             <Upload size={12} /> UPLOAD
                           </button>
-                          {formData.logoUrl && (
+                          {course.logoUrl && (
                             <button 
                               onClick={async () => {
-                                const urlToDelete = formData.logoUrl;
+                                const urlToDelete = course.logoUrl;
                                 setConfirmDelete({
                                   title: 'Apagar Logo?',
                                   message: 'Tem certeza que deseja remover a logo permanentemente?',
                                   onConfirm: () => {
-                                    setFormData(prev => ({ ...prev, logoUrl: '' }));
+                                    onUpdate({ ...course, logoUrl: '' });
                                     if (urlToDelete) deleteFromBunny(urlToDelete);
                                     setConfirmDelete(null);
                                   }
@@ -1526,8 +1472,8 @@ useEffect(() => {
                   <div className="space-y-4">
                     <label className="text-xs font-black text-white/40 uppercase tracking-widest">Cor de Destaque</label>
                     <div className="flex gap-6 items-center">
-                      <input type="color" value={formData.accentColor} onChange={(e) => setFormData({...formData, accentColor: e.target.value})} className="w-14 h-14 bg-transparent border-none cursor-pointer" />
-                      <input type="text" value={formData.accentColor} className="flex-1 bg-black border border-white/10 rounded px-5 py-3 text-white outline-none text-xs font-mono" readOnly />
+                      <input type="color" value={course.accentColor} onChange={(e) => onUpdate({...course, accentColor: e.target.value})} className="w-14 h-14 bg-transparent border-none cursor-pointer" />
+                      <input type="text" value={course.accentColor} className="flex-1 bg-black border border-white/10 rounded px-5 py-3 text-white outline-none text-xs font-mono" readOnly />
                     </div>
                   </div>
                 </div>
@@ -1537,7 +1483,7 @@ useEffect(() => {
                 <h3 className="text-xl font-bold border-l-4 border-amber-500 pl-4 text-white uppercase tracking-tight italic">Capa Principal do Curso (Banner)</h3>
                 <div className="space-y-4">
                   <div className="w-full aspect-[21/9] rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl relative group">
-                    <img src={formData.bannerUrl} className="w-full h-full object-cover" alt="Banner preview" />
+                    <img src={course.bannerUrl} className="w-full h-full object-cover" alt="Banner preview" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col sm:flex-row items-center justify-center gap-4 p-4">
                       <button 
                         onClick={() => triggerImageUpload({ type: 'banner' })}
@@ -1545,15 +1491,15 @@ useEffect(() => {
                       >
                         <Upload size={20} /> ALTERAR IMAGEM
                       </button>
-                      {formData.bannerUrl && (
+                      {course.bannerUrl && (
                         <button 
                           onClick={async () => {
-                          const urlToDelete = formData.bannerUrl;
+                          const urlToDelete = course.bannerUrl;
                           setConfirmDelete({
                             title: 'Apagar Banner?',
                             message: 'Deseja remover o banner principal permanentemente?',
                             onConfirm: () => {
-                              setFormData(prev => ({ ...prev, bannerUrl: '' }));
+                              onUpdate({ ...course, bannerUrl: '' });
                               if (urlToDelete) deleteFromBunny(urlToDelete);
                               setConfirmDelete(null);
                             }
@@ -1569,8 +1515,8 @@ useEffect(() => {
                   <div className="flex gap-4">
                     <input 
                       type="text" 
-                      value={formData.bannerUrl} 
-                      onChange={(e) => setFormData({...formData, bannerUrl: e.target.value})} 
+                      value={course.bannerUrl} 
+                      onChange={(e) => onUpdate({...course, bannerUrl: e.target.value})} 
                       placeholder="Ou cole a URL da Imagem aqui..." 
                       className="flex-1 bg-black border border-white/10 rounded-lg px-5 py-4 text-white outline-none focus:border-amber-500 text-xs" 
                     />
@@ -1599,7 +1545,7 @@ useEffect(() => {
                         language: 'pt',
                         modules: []
                       };
-                      setFormData({ ...formData, upsellCourses: [...(formData.upsellCourses || []), newUpsell] });
+                      onUpdate({ ...course, upsellCourses: [...(course.upsellCourses || []), newUpsell] });
                     }}
                     className="w-full sm:w-auto bg-amber-500 text-black px-6 py-3 rounded-lg font-black text-xs flex items-center justify-center gap-2 hover:bg-white transition-all shadow-lg"
                   >
@@ -1610,7 +1556,7 @@ useEffect(() => {
               </div>
 
               <div className="space-y-8">
-                {(formData.upsellCourses || []).map((upsell, uIdx) => (
+                {(course.upsellCourses || []).map((upsell, uIdx) => (
                   <div key={upsell.id} className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
                     <div className="p-4 sm:p-8 border-b border-white/5 flex items-center justify-between bg-white/5">
                       <div className="flex items-center gap-6">
@@ -1633,10 +1579,10 @@ useEffect(() => {
                             title: 'Remover Upsell?',
                             message: 'Tem certeza que deseja remover este curso de upsell permanentemente?',
                             onConfirm: () => {
-                              setFormData(prev => ({
-                                ...prev,
-                                upsellCourses: prev.upsellCourses.filter((_, i) => i !== uIdx)
-                              }));
+                              onUpdate({
+                                ...course,
+                                upsellCourses: course.upsellCourses.filter((_, i) => i !== uIdx)
+                              });
                               setConfirmDelete(null);
                             }
                           });
@@ -1803,7 +1749,7 @@ useEffect(() => {
                   </div>
                 ))}
 
-                {(!formData.upsellCourses || formData.upsellCourses.length === 0) && (
+                {(!course.upsellCourses || course.upsellCourses.length === 0) && (
                   <div className="py-20 text-center bg-[#111] border-2 border-dashed border-white/5 rounded-3xl">
                     <ShoppingCart size={48} className="text-white/5 mx-auto mb-6" />
                     <p className="text-white/20 font-black uppercase tracking-widest italic">Nenhum curso de upsell cadastrado</p>
@@ -1988,7 +1934,7 @@ useEffect(() => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {bunnyFiles.map((file) => {
-                    const pullZoneUrl = formData.bunnyPullZoneUrl?.trim()?.replace(/\/$/, '') || 'https://teste-aula.b-cdn.net';
+                    const pullZoneUrl = course.bunnyPullZoneUrl?.trim()?.replace(/\/$/, '') || 'https://teste-aula.b-cdn.net';
                     const fileUrl = `${pullZoneUrl}/${file.ObjectName}`;
                     const isVideo = file.ObjectName.toLowerCase().endsWith('.mp4') || file.ObjectName.toLowerCase().endsWith('.webm');
                     const isImage = ['jpg', 'jpeg', 'png', 'webp', 'gif'].some(ext => file.ObjectName.toLowerCase().endsWith(ext));

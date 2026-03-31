@@ -80,35 +80,35 @@ useEffect(() => {
 
   const isAdmin = userEmail === 'cdsmarketingg@gmail.com';
 
- const handleUpdateCourse = async (newData: CourseConfig) => {
-  try {
-    const response = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newData)
-    });
+  const handleUpdateCourse = async (newData: CourseConfig) => {
+    // ✅ Atualiza localmente primeiro para resposta imediata na UI
+    setCourseData(newData);
 
-    const result = await response.json();
+    try {
+      const response = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newData)
+      });
 
-    console.log('🔥 SALVO:', result);
+      const result = await response.json();
+      console.log('🔥 SALVO NO SERVIDOR:', result);
 
-    if (!response.ok) throw new Error('Erro ao salvar');
+      if (!response.ok) throw new Error('Erro ao salvar');
 
-    // 🔥 BUSCA ATUALIZADO
-    const resReload = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
-    const dataReload = await resReload.json();
+      // Opcional: Recarregar do servidor para garantir sincronia total
+      // Mas como já atualizamos localmente, a UI já está correta.
+      // const resReload = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
+      // const dataReload = await resReload.json();
+      // setCourseData(dataReload);
 
-    console.log('🔥 RELOAD:', dataReload);
-
-    setCourseData(dataReload);
-    
-
-  } catch (error) {
-    console.error('Erro saving config:', error);
-  }
-};
+    } catch (error) {
+      console.error('Erro saving config:', error);
+      // Em caso de erro, poderíamos reverter o estado local se necessário
+    }
+  };
 
 
   if (isAuthenticated === null || loadingConfig) {
