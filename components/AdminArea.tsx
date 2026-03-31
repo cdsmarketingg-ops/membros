@@ -85,6 +85,12 @@ const LessonThumbnail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
 };
 
 const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
+  const [formData, setFormData] = useState<CourseConfig>(course);
+
+  useEffect(() => {
+    setFormData(course);
+  }, [course]);
+
   const [activeTab, setActiveTab] = useState<'general' | 'modules' | 'appearance' | 'upsells' | 'notifications' | 'students' | 'bunny-files'>('modules');
   const [students, setStudents] = useState<any[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
@@ -249,7 +255,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
             {/* MODULE HEADER BAR */}
             <div onClick={() => setExpandedModule(expandedModule === mod.id ? null : mod.id)} className="p-4 sm:p-6 flex items-center justify-between cursor-pointer hover:bg-white/5 bg-black/20">
               <div className="flex items-center gap-3 sm:gap-6 overflow-hidden">
-                <div className={`flex-shrink-0 rounded object-cover ring-1 ring-white/10 overflow-hidden ${course.moduleThumbnailOrientation === 'horizontal' ? 'w-16 sm:w-24 h-10 sm:h-14' : 'w-8 sm:w-10 h-10 sm:h-14'}`}>
+                <div className={`flex-shrink-0 rounded object-cover ring-1 ring-white/10 overflow-hidden ${formData.moduleThumbnailOrientation === 'horizontal' ? 'w-16 sm:w-24 h-10 sm:h-14' : 'w-8 sm:w-10 h-10 sm:h-14'}`}>
                   {mod.thumbnailUrl ? (
                     <img src={mod.thumbnailUrl} className="w-full h-full object-cover" alt={mod.title} />
                   ) : (
@@ -603,10 +609,10 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
   const insertHtmlAtCursor = (moduleId: string, lessonId: string, htmlToInsert: string, courseId?: string) => {
     let lesson: Lesson | undefined;
     if (courseId) {
-      const upsell = course.upsellCourses.find(u => u.id === courseId);
+      const upsell = formData.upsellCourses.find(u => u.id === courseId);
       lesson = upsell?.modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
     } else {
-      lesson = course.modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
+      lesson = formData.modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
     }
     
     if (!lesson) return;
@@ -624,38 +630,38 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
     };
 
     if (courseId) {
-      onUpdate({
-        ...course,
-        upsellCourses: course.upsellCourses.map(u => u.id === courseId ? { ...u, modules: [...u.modules, newModule] } : u)
-      });
+      setFormData(prev => ({
+        ...prev,
+        upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? { ...u, modules: [...u.modules, newModule] } : u)
+      }));
     } else {
-      onUpdate({ ...course, modules: [...course.modules, newModule] });
+      setFormData(prev => ({ ...prev, modules: [...prev.modules, newModule] }));
     }
     setExpandedModule(newModule.id);
   };
 
   const updateModule = (id: string, updates: Partial<Module>, courseId?: string) => {
     if (courseId) {
-      onUpdate({
-        ...course,
-        upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
+      setFormData(prev => ({
+        ...prev,
+        upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
           ...u,
           modules: u.modules.map(m => m.id === id ? { ...m, ...updates } : m)
         } : u)
-      });
+      }));
     } else {
-      onUpdate({
-        ...course,
-        modules: course.modules.map(m => m.id === id ? { ...m, ...updates } : m)
-      });
+      setFormData(prev => ({
+        ...prev,
+        modules: prev.modules.map(m => m.id === id ? { ...m, ...updates } : m)
+      }));
     }
   };
 
   const updateUpsell = (id: string, updates: any) => {
-    onUpdate({
-      ...course,
-      upsellCourses: course.upsellCourses.map(u => u.id === id ? { ...u, ...updates } : u)
-    });
+    setFormData(prev => ({
+      ...prev,
+      upsellCourses: prev.upsellCourses.map(u => u.id === id ? { ...u, ...updates } : u)
+    }));
   };
 
   const deleteModule = (id: string, courseId?: string) => {
@@ -664,18 +670,18 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
       message: 'Tem certeza que deseja excluir este módulo e todas as suas aulas? Esta ação não pode ser desfeita.',
       onConfirm: () => {
         if (courseId) {
-          onUpdate({
-            ...course,
-            upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
+          setFormData(prev => ({
+            ...prev,
+            upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
               ...u,
               modules: u.modules.filter(m => m.id !== id)
             } : u)
-          });
+          }));
         } else {
-          onUpdate({
-            ...course,
-            modules: course.modules.filter(m => m.id !== id)
-          });
+          setFormData(prev => ({
+            ...prev,
+            modules: prev.modules.filter(m => m.id !== id)
+          }));
         }
         setConfirmDelete(null);
       }
@@ -695,9 +701,9 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
     };
 
     if (courseId) {
-      onUpdate({
-        ...course,
-        upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
+      setFormData(prev => ({
+        ...prev,
+        upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
           ...u,
           modules: u.modules.map(m => {
             if (m.id === moduleId) {
@@ -706,25 +712,25 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
             return m;
           })
         } : u)
-      });
+      }));
     } else {
-      onUpdate({
-        ...course,
-        modules: course.modules.map(m => {
+      setFormData(prev => ({
+        ...prev,
+        modules: prev.modules.map(m => {
           if (m.id === moduleId) {
             return { ...m, lessons: [...m.lessons, { ...newLesson, thumbnailUrl: m.thumbnailUrl }] };
           }
           return m;
         })
-      });
+      }));
     }
   };
 
   const updateLesson = (moduleId: string, lessonId: string, updates: Partial<Lesson>, courseId?: string) => {
     if (courseId) {
-      onUpdate({
-        ...course,
-        upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
+      setFormData(prev => ({
+        ...prev,
+        upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
           ...u,
           modules: u.modules.map(m => {
             if (m.id === moduleId) {
@@ -736,11 +742,11 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
             return m;
           })
         } : u)
-      });
+      }));
     } else {
-      onUpdate({
-        ...course,
-        modules: course.modules.map(m => {
+      setFormData(prev => ({
+        ...prev,
+        modules: prev.modules.map(m => {
           if (m.id === moduleId) {
             return {
               ...m,
@@ -749,7 +755,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
           }
           return m;
         })
-      });
+      }));
     }
   };
 
@@ -759,9 +765,9 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
       message: 'Tem certeza que deseja excluir esta aula permanentemente?',
       onConfirm: () => {
         if (courseId) {
-          onUpdate({
-            ...course,
-            upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
+          setFormData(prev => ({
+            ...prev,
+            upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
               ...u,
               modules: u.modules.map(m => {
                 if (m.id === moduleId) {
@@ -770,17 +776,17 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                 return m;
               })
             } : u)
-          });
+          }));
         } else {
-          onUpdate({
-            ...course,
-            modules: course.modules.map(m => {
+          setFormData(prev => ({
+            ...prev,
+            modules: prev.modules.map(m => {
               if (m.id === moduleId) {
                 return { ...m, lessons: m.lessons.filter(l => l.id !== lessonId) };
               }
               return m;
             })
-          });
+          }));
         }
         setConfirmDelete(null);
       }
@@ -789,9 +795,9 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
 
   const updateMaterial = (moduleId: string, lessonId: string, materialId: string, updates: Partial<Material>, courseId?: string) => {
     if (courseId) {
-      onUpdate({
-        ...course,
-        upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
+      setFormData(prev => ({
+        ...prev,
+        upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
           ...u,
           modules: u.modules.map(m => {
             if (m.id === moduleId) {
@@ -811,11 +817,11 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
             return m;
           })
         } : u)
-      });
+      }));
     } else {
-      onUpdate({
-        ...course,
-        modules: course.modules.map(m => {
+      setFormData(prev => ({
+        ...prev,
+        modules: prev.modules.map(m => {
           if (m.id === moduleId) {
             return {
               ...m,
@@ -832,7 +838,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
           }
           return m;
         })
-      });
+      }));
     }
   };
 
@@ -842,9 +848,9 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
       message: 'Deseja remover este material de apoio?',
       onConfirm: () => {
         if (courseId) {
-          onUpdate({
-            ...course,
-            upsellCourses: course.upsellCourses.map(u => u.id === courseId ? {
+          setFormData(prev => ({
+            ...prev,
+            upsellCourses: prev.upsellCourses.map(u => u.id === courseId ? {
               ...u,
               modules: u.modules.map(m => {
                 if (m.id === moduleId) {
@@ -864,11 +870,11 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                 return m;
               })
             } : u)
-          });
+          }));
         } else {
-          onUpdate({
-            ...course,
-            modules: course.modules.map(m => {
+          setFormData(prev => ({
+            ...prev,
+            modules: prev.modules.map(m => {
               if (m.id === moduleId) {
                 return {
                   ...m,
@@ -885,7 +891,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
               }
               return m;
             })
-          });
+          }));
         }
         setConfirmDelete(null);
       }
@@ -915,10 +921,10 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
 
   const uploadToBunny = async (file: File): Promise<string | null> => {
     // Bunny.net Config from course
-    const storageZoneForUpload = course.bunnyStorageZone?.trim() || 'teste-aula';
-    let accessKey = course.bunnyAccessKey?.trim();
-    const pullZoneUrl = course.bunnyPullZoneUrl?.trim()?.replace(/\/$/, '');
-    let region = (course.bunnyRegion || 'br')?.trim(); 
+    const storageZoneForUpload = formData.bunnyStorageZone?.trim() || 'teste-aula';
+    let accessKey = formData.bunnyAccessKey?.trim();
+    const pullZoneUrl = formData.bunnyPullZoneUrl?.trim()?.replace(/\/$/, '');
+    let region = (formData.bunnyRegion || 'br')?.trim(); 
 
     // Sanitize access key (remove spaces, hidden chars)
     accessKey = accessKey?.replace(/[^a-f0-9-]/gi, '');
@@ -989,9 +995,9 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
       return false;
     }
 
-    const storageZone = course.bunnyStorageZone?.trim() || 'teste-aula';
-    let accessKey = course.bunnyAccessKey?.trim();
-    let region = (course.bunnyRegion || 'br')?.trim();
+    const storageZone = formData.bunnyStorageZone?.trim() || 'teste-aula';
+    let accessKey = formData.bunnyAccessKey?.trim();
+    let region = (formData.bunnyRegion || 'br')?.trim();
     
     accessKey = accessKey?.replace(/[^a-f0-9-]/gi, '');
     
@@ -1062,9 +1068,9 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
 
     if (imageUrl) {
       if (target.type === 'logo') {
-        onUpdate({ ...course, logoUrl: imageUrl });
+        setFormData(prev => ({ ...prev, logoUrl: imageUrl }));
       } else if (target.type === 'banner') {
-        onUpdate({ ...course, bannerUrl: imageUrl });
+        setFormData(prev => ({ ...prev, bannerUrl: imageUrl }));
       } else if (target.type === 'module' && target.modId) {
         updateModule(target.modId, { thumbnailUrl: imageUrl }, target.courseId);
       } else if (target.type === 'lesson' && target.modId && target.lessonId) {
@@ -1089,10 +1095,10 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
 
     let mod: Module | undefined;
     if (target.courseId) {
-      const upsell = course.upsellCourses.find(u => u.id === target.courseId);
+      const upsell = formData.upsellCourses.find(u => u.id === target.courseId);
       mod = upsell?.modules.find(m => m.id === target.modId);
     } else {
-      mod = course.modules.find(m => m.id === target.modId);
+      mod = formData.modules.find(m => m.id === target.modId);
     }
     
     const lesson = mod?.lessons.find(l => l.id === target.lessonId);
@@ -1134,9 +1140,9 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
 
     if (newMaterials.length > 0) {
       if (target.courseId) {
-        onUpdate({
-          ...course,
-          upsellCourses: course.upsellCourses.map(u => u.id === target.courseId ? {
+        setFormData(prev => ({
+          ...prev,
+          upsellCourses: prev.upsellCourses.map(u => u.id === target.courseId ? {
             ...u,
             modules: u.modules.map(m => m.id === target.modId ? {
               ...m,
@@ -1146,18 +1152,18 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
               } : l)
             } : m)
           } : u)
-        });
+        }));
       } else {
-        onUpdate({
-          ...course,
-          modules: course.modules.map(m => m.id === target.modId ? {
+        setFormData(prev => ({
+          ...prev,
+          modules: prev.modules.map(m => m.id === target.modId ? {
             ...m,
             lessons: m.lessons.map(l => l.id === target.lessonId ? { 
               ...l, 
               materials: [...(l.materials || []), ...newMaterials] 
             } : l)
           } : m)
-        });
+        }));
       }
     }
     
@@ -1208,7 +1214,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
           <p className="text-white/40 mt-1 md:mt-2 font-medium text-sm md:text-base">Personalize a experiência premium dos seus alunos.</p>
         </div>
         <button 
-          onClick={() => onUpdate(course)}
+          onClick={() => onUpdate(formData)}
           className="w-full md:w-auto bg-amber-500 text-black px-8 md:px-12 py-3 md:py-4 rounded font-black hover:bg-white transition-all shadow-xl shadow-amber-500/10 flex items-center justify-center gap-3 text-sm md:text-base"
         >
           <Save size={20} /> SALVAR ALTERAÇÕES
@@ -1248,17 +1254,17 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                   <label className="text-xs font-black text-white/40 uppercase tracking-widest">Nome do Treinamento</label>
                   <input 
                     type="text" 
-                    value={course.title || ''} 
-                    onChange={(e) => onUpdate({
-                      ...course,
+                    value={formData.title || ''} 
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
                       title: e.target.value
-                    })} 
+                    }))} 
                     className="w-full bg-black border border-white/10 rounded-lg px-4 md:px-5 py-3 md:py-4 text-white focus:border-amber-500 outline-none text-sm md:text-base" 
                   />
                 </div>
                 <div className="space-y-3">
                   <label className="text-xs font-black text-white/40 uppercase tracking-widest">Instrutor</label>
-                  <input type="text" value={course.instructorName} onChange={(e) => onUpdate({...course, instructorName: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-4 md:px-5 py-3 md:py-4 text-white focus:border-amber-500 outline-none text-sm md:text-base" />
+                  <input type="text" value={formData.instructorName} onChange={(e) => setFormData(prev => ({...prev, instructorName: e.target.value}))} className="w-full bg-black border border-white/10 rounded-lg px-4 md:px-5 py-3 md:py-4 text-white focus:border-amber-500 outline-none text-sm md:text-base" />
                 </div>
               </div>
 
@@ -1267,14 +1273,14 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                   <label className="text-xs font-black text-white/40 uppercase tracking-widest">Idioma do Aluno</label>
                   <div className="flex gap-2 md:gap-4">
                     <button 
-                      onClick={() => onUpdate({...course, language: 'pt'})}
-                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${course.language === 'pt' || !course.language ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
+                      onClick={() => setFormData(prev => ({...prev, language: 'pt'}))}
+                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${formData.language === 'pt' || !formData.language ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
                     >
                       🇧🇷 <span className="hidden xs:inline">PORTUGUÊS</span><span className="xs:hidden">PT</span>
                     </button>
                     <button 
-                      onClick={() => onUpdate({...course, language: 'es'})}
-                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${course.language === 'es' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
+                      onClick={() => setFormData(prev => ({...prev, language: 'es'}))}
+                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${formData.language === 'es' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
                     >
                       🇪🇸 <span className="hidden xs:inline">ESPAÑOL</span><span className="xs:hidden">ES</span>
                     </button>
@@ -1284,14 +1290,14 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                   <label className="text-xs font-black text-white/40 uppercase tracking-widest">Orientação da Thumbnail</label>
                   <div className="flex gap-2 md:gap-4">
                     <button 
-                      onClick={() => onUpdate({...course, moduleThumbnailOrientation: 'horizontal'})}
-                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${course.moduleThumbnailOrientation === 'horizontal' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
+                      onClick={() => setFormData(prev => ({...prev, moduleThumbnailOrientation: 'horizontal'}))}
+                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${formData.moduleThumbnailOrientation === 'horizontal' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
                     >
                       <RectangleHorizontal size={14} /> <span className="hidden xs:inline">HORIZONTAL</span><span className="xs:hidden">HORIZ</span>
                     </button>
                     <button 
-                      onClick={() => onUpdate({...course, moduleThumbnailOrientation: 'vertical'})}
-                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${course.moduleThumbnailOrientation === 'vertical' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
+                      onClick={() => setFormData(prev => ({...prev, moduleThumbnailOrientation: 'vertical'}))}
+                      className={`flex-1 py-2 md:py-3 rounded-lg border flex items-center justify-center gap-1 md:gap-2 font-bold text-[10px] md:text-xs ${formData.moduleThumbnailOrientation === 'vertical' ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/40 hover:bg-white/5'}`}
                     >
                       <Square size={14} /> <span className="hidden xs:inline">VERTICAL</span><span className="xs:hidden">VERT</span>
                     </button>
@@ -1306,8 +1312,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                     <label className="text-[10px] font-black text-white/20 uppercase tracking-widest">Storage Zone Name</label>
                     <input 
                       type="text" 
-                      value={course.bunnyStorageZone} 
-                      onChange={(e) => onUpdate({...course, bunnyStorageZone: e.target.value})} 
+                      value={formData.bunnyStorageZone} 
+                      onChange={(e) => setFormData(prev => ({...prev, bunnyStorageZone: e.target.value}))} 
                       className="w-full bg-black border border-white/10 rounded px-4 py-3 text-white text-xs outline-none focus:border-amber-500" 
                       placeholder="ex: teste-aula"
                     />
@@ -1316,8 +1322,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                     <label className="text-[10px] font-black text-white/20 uppercase tracking-widest">Storage Access Key</label>
                     <input 
                       type="password" 
-                      value={course.bunnyAccessKey} 
-                      onChange={(e) => onUpdate({...course, bunnyAccessKey: e.target.value})} 
+                      value={formData.bunnyAccessKey} 
+                      onChange={(e) => setFormData(prev => ({...prev, bunnyAccessKey: e.target.value}))} 
                       className="w-full bg-black border border-white/10 rounded px-4 py-3 text-white text-xs outline-none focus:border-amber-500" 
                       placeholder="Sua chave de acesso"
                     />
@@ -1326,8 +1332,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                     <label className="text-[10px] font-black text-white/20 uppercase tracking-widest">Pull Zone Hostname (URL)</label>
                     <input 
                       type="text" 
-                      value={course.bunnyPullZoneUrl} 
-                      onChange={(e) => onUpdate({...course, bunnyPullZoneUrl: e.target.value})} 
+                      value={formData.bunnyPullZoneUrl} 
+                      onChange={(e) => setFormData(prev => ({...prev, bunnyPullZoneUrl: e.target.value}))} 
                       className="w-full bg-black border border-white/10 rounded px-4 py-3 text-white text-xs outline-none focus:border-amber-500" 
                       placeholder="ex: https://teste-aula.b-cdn.net"
                     />
@@ -1336,8 +1342,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                     <label className="text-[10px] font-black text-white/20 uppercase tracking-widest">Storage Region (ex: br, ny, sg ou vazio)</label>
                     <input 
                       type="text" 
-                      value={course.bunnyRegion} 
-                      onChange={(e) => onUpdate({...course, bunnyRegion: e.target.value})} 
+                      value={formData.bunnyRegion} 
+                      onChange={(e) => setFormData(prev => ({...prev, bunnyRegion: e.target.value}))} 
                       className="w-full bg-black border border-white/10 rounded px-4 py-3 text-white text-xs outline-none focus:border-amber-500" 
                       placeholder="br"
                     />
@@ -1416,7 +1422,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
 
           {activeTab === 'modules' && (
             <div className="space-y-8">
-              {renderModuleList(course.modules)}
+              {renderModuleList(formData.modules)}
             </div>
           )}
 
@@ -1429,13 +1435,13 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                     <label className="text-xs font-black text-white/40 uppercase tracking-widest">Logo Principal (PNG/SVG)</label>
                     <div className="flex flex-col gap-4">
                       <div className="w-32 h-32 rounded-2xl bg-black border border-white/5 p-4 flex items-center justify-center shadow-inner overflow-hidden">
-                        <img src={course.logoUrl} className="max-w-full max-h-full object-contain" alt="Logo preview" />
+                        <img src={formData.logoUrl} className="max-w-full max-h-full object-contain" alt="Logo preview" />
                       </div>
                       <div className="flex flex-col sm:flex-row gap-4">
                         <input 
                           type="text" 
-                          value={course.logoUrl} 
-                          onChange={(e) => onUpdate({...course, logoUrl: e.target.value})} 
+                          value={formData.logoUrl} 
+                          onChange={(e) => setFormData(prev => ({...prev, logoUrl: e.target.value}))} 
                           className="flex-1 bg-black border border-white/10 rounded px-4 py-2 text-white outline-none text-[10px]" 
                           placeholder="URL da Logo"
                         />
@@ -1446,15 +1452,15 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                           >
                             <Upload size={12} /> UPLOAD
                           </button>
-                          {course.logoUrl && (
+                          {formData.logoUrl && (
                             <button 
                               onClick={async () => {
-                                const urlToDelete = course.logoUrl;
+                                const urlToDelete = formData.logoUrl;
                                 setConfirmDelete({
                                   title: 'Apagar Logo?',
                                   message: 'Tem certeza que deseja remover a logo permanentemente?',
                                   onConfirm: () => {
-                                    onUpdate({ ...course, logoUrl: '' });
+                                    setFormData(prev => ({ ...prev, logoUrl: '' }));
                                     if (urlToDelete) deleteFromBunny(urlToDelete);
                                     setConfirmDelete(null);
                                   }
@@ -1472,8 +1478,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                   <div className="space-y-4">
                     <label className="text-xs font-black text-white/40 uppercase tracking-widest">Cor de Destaque</label>
                     <div className="flex gap-6 items-center">
-                      <input type="color" value={course.accentColor} onChange={(e) => onUpdate({...course, accentColor: e.target.value})} className="w-14 h-14 bg-transparent border-none cursor-pointer" />
-                      <input type="text" value={course.accentColor} className="flex-1 bg-black border border-white/10 rounded px-5 py-3 text-white outline-none text-xs font-mono" readOnly />
+                      <input type="color" value={formData.accentColor} onChange={(e) => setFormData(prev => ({...prev, accentColor: e.target.value}))} className="w-14 h-14 bg-transparent border-none cursor-pointer" />
+                      <input type="text" value={formData.accentColor} className="flex-1 bg-black border border-white/10 rounded px-5 py-3 text-white outline-none text-xs font-mono" readOnly />
                     </div>
                   </div>
                 </div>
@@ -1483,7 +1489,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                 <h3 className="text-xl font-bold border-l-4 border-amber-500 pl-4 text-white uppercase tracking-tight italic">Capa Principal do Curso (Banner)</h3>
                 <div className="space-y-4">
                   <div className="w-full aspect-[21/9] rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl relative group">
-                    <img src={course.bannerUrl} className="w-full h-full object-cover" alt="Banner preview" />
+                    <img src={formData.bannerUrl} className="w-full h-full object-cover" alt="Banner preview" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col sm:flex-row items-center justify-center gap-4 p-4">
                       <button 
                         onClick={() => triggerImageUpload({ type: 'banner' })}
@@ -1491,15 +1497,15 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                       >
                         <Upload size={20} /> ALTERAR IMAGEM
                       </button>
-                      {course.bannerUrl && (
+                      {formData.bannerUrl && (
                         <button 
                           onClick={async () => {
-                          const urlToDelete = course.bannerUrl;
+                          const urlToDelete = formData.bannerUrl;
                           setConfirmDelete({
                             title: 'Apagar Banner?',
                             message: 'Deseja remover o banner principal permanentemente?',
                             onConfirm: () => {
-                              onUpdate({ ...course, bannerUrl: '' });
+                              setFormData(prev => ({ ...prev, bannerUrl: '' }));
                               if (urlToDelete) deleteFromBunny(urlToDelete);
                               setConfirmDelete(null);
                             }
@@ -1515,8 +1521,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                   <div className="flex gap-4">
                     <input 
                       type="text" 
-                      value={course.bannerUrl} 
-                      onChange={(e) => onUpdate({...course, bannerUrl: e.target.value})} 
+                      value={formData.bannerUrl} 
+                      onChange={(e) => setFormData(prev => ({...prev, bannerUrl: e.target.value}))} 
                       placeholder="Ou cole a URL da Imagem aqui..." 
                       className="flex-1 bg-black border border-white/10 rounded-lg px-5 py-4 text-white outline-none focus:border-amber-500 text-xs" 
                     />
@@ -1545,7 +1551,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                         language: 'pt',
                         modules: []
                       };
-                      onUpdate({ ...course, upsellCourses: [...(course.upsellCourses || []), newUpsell] });
+                      setFormData(prev => ({ ...prev, upsellCourses: [...(prev.upsellCourses || []), newUpsell] }));
                     }}
                     className="w-full sm:w-auto bg-amber-500 text-black px-6 py-3 rounded-lg font-black text-xs flex items-center justify-center gap-2 hover:bg-white transition-all shadow-lg"
                   >
@@ -1556,7 +1562,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
               </div>
 
               <div className="space-y-8">
-                {(course.upsellCourses || []).map((upsell, uIdx) => (
+                {(formData.upsellCourses || []).map((upsell, uIdx) => (
                   <div key={upsell.id} className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
                     <div className="p-4 sm:p-8 border-b border-white/5 flex items-center justify-between bg-white/5">
                       <div className="flex items-center gap-6">
@@ -1579,10 +1585,10 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                             title: 'Remover Upsell?',
                             message: 'Tem certeza que deseja remover este curso de upsell permanentemente?',
                             onConfirm: () => {
-                              onUpdate({
-                                ...course,
-                                upsellCourses: course.upsellCourses.filter((_, i) => i !== uIdx)
-                              });
+                              setFormData(prev => ({
+                                ...prev,
+                                upsellCourses: prev.upsellCourses.filter((_, i) => i !== uIdx)
+                              }));
                               setConfirmDelete(null);
                             }
                           });
@@ -1749,7 +1755,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                   </div>
                 ))}
 
-                {(!course.upsellCourses || course.upsellCourses.length === 0) && (
+                {(!formData.upsellCourses || formData.upsellCourses.length === 0) && (
                   <div className="py-20 text-center bg-[#111] border-2 border-dashed border-white/5 rounded-3xl">
                     <ShoppingCart size={48} className="text-white/5 mx-auto mb-6" />
                     <p className="text-white/20 font-black uppercase tracking-widest italic">Nenhum curso de upsell cadastrado</p>
@@ -1934,7 +1940,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {bunnyFiles.map((file) => {
-                    const pullZoneUrl = course.bunnyPullZoneUrl?.trim()?.replace(/\/$/, '') || 'https://teste-aula.b-cdn.net';
+                    const pullZoneUrl = formData.bunnyPullZoneUrl?.trim()?.replace(/\/$/, '') || 'https://teste-aula.b-cdn.net';
                     const fileUrl = `${pullZoneUrl}/${file.ObjectName}`;
                     const isVideo = file.ObjectName.toLowerCase().endsWith('.mp4') || file.ObjectName.toLowerCase().endsWith('.webm');
                     const isImage = ['jpg', 'jpeg', 'png', 'webp', 'gif'].some(ext => file.ObjectName.toLowerCase().endsWith(ext));
