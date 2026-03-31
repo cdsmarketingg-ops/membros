@@ -103,18 +103,9 @@ const App: React.FC = () => {
       // 🔥 ATUALIZA LOCALMENTE IMEDIATAMENTE PARA EVITAR "REVERT"
       setCourseData(newData);
 
-      // 🔥 RELOAD DE SEGURANÇA (BACKGROUND)
-      const resReload = await fetch('/api/admin/config?t=' + Date.now());
-      const dataReload = await resReload.json();
-
-      console.log('🔥 RELOAD (SYNC):', dataReload);
-      
-      if (dataReload && Object.keys(dataReload).length > 0) {
-        setCourseData(dataReload);
-      }
-
     } catch (error) {
       console.error('❌ erro ao salvar:', error);
+      throw error;
     }
   };
 

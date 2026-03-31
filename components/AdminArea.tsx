@@ -12,7 +12,7 @@ import { db } from '../src/firebase';
 
 interface AdminAreaProps {
   course: CourseConfig;
-  onUpdate: (newData: CourseConfig) => void;
+  onUpdate: (newData: CourseConfig) => Promise<void>;
 }
 
 const getAutoThumbnail = (videoUrl: string) => {
@@ -1216,7 +1216,15 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
           <p className="text-white/40 mt-1 md:mt-2 font-medium text-sm md:text-base">Personalize a experiência premium dos seus alunos.</p>
         </div>
         <button 
-          onClick={() => onUpdate(formData)}
+          onClick={async () => {
+            try {
+              await onUpdate(formData);
+              setShowSaveToast(true);
+              setTimeout(() => setShowSaveToast(false), 3000);
+            } catch (e) {
+              alert('Erro ao salvar alterações. Verifique sua conexão.');
+            }
+          }}
           className="w-full md:w-auto bg-amber-500 text-black px-8 md:px-12 py-3 md:py-4 rounded font-black hover:bg-white transition-all shadow-xl shadow-amber-500/10 flex items-center justify-center gap-3 text-sm md:text-base"
         >
           <Save size={20} /> SALVAR ALTERAÇÕES
