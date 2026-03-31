@@ -49,7 +49,7 @@ useEffect(() => {
 
   const checkSession = async () => {
     try {
-      const response = await fetch('/api/auth/session');
+      const response = await fetch('https://api.rafaelpedrozo.online/api/auth/session');
       const data = await response.json();
       if (data.authenticated) {
         setIsAuthenticated(true);
