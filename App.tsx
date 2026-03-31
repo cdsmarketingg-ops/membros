@@ -81,8 +81,34 @@ useEffect(() => {
 
   const isAdmin = userEmail === 'cdsmarketingg@gmail.com';
 
-  const handleUpdateCourse = async (newData: CourseConfig) => {
-  setCourseData(newData);
+ const handleUpdateCourse = async (newData: CourseConfig) => {
+  try {
+    const response = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newData)
+    });
+
+    const result = await response.json();
+
+    console.log('🔥 SALVO:', result);
+
+    if (!response.ok) throw new Error('Erro ao salvar');
+
+    // 🔥 BUSCA ATUALIZADO DO BACKEND (ESSENCIAL)
+    const resReload = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
+    const dataReload = await resReload.json();
+
+    console.log('🔥 RELOAD:', dataReload);
+
+    setCourseData(dataReload);
+
+  } catch (error) {
+    console.error('Erro saving config:', error);
+  }
+};
 
   try {
     const response = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
