@@ -523,6 +523,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                                   </button>
                                 </div>
                                 <textarea 
+                                  id={`desc-${lesson.id}`}
                                   value={lesson.description}
                                   onChange={(e) => updateLesson(mod.id, lesson.id, { description: e.target.value }, courseId)}
                                   rows={10}
@@ -607,17 +608,37 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
   };
 
   const insertHtmlAtCursor = (moduleId: string, lessonId: string, htmlToInsert: string, courseId?: string) => {
-    let lesson: Lesson | undefined;
-    if (courseId) {
-      const upsell = formData.upsellCourses.find(u => u.id === courseId);
-      lesson = upsell?.modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
-    } else {
-      lesson = formData.modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
-    }
+    const textarea = document.getElementById(`desc-${lessonId}`) as HTMLTextAreaElement;
     
-    if (!lesson) return;
-    const currentDescription = lesson.description || '';
-    updateLesson(moduleId, lessonId, { description: currentDescription + '\n' + htmlToInsert }, courseId);
+    if (!textarea) {
+      let lesson: Lesson | undefined;
+      if (courseId) {
+        const upsell = formData.upsellCourses.find(u => u.id === courseId);
+        lesson = upsell?.modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
+      } else {
+        lesson = formData.modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
+      }
+      
+      if (!lesson) return;
+      const currentDescription = lesson.description || '';
+      updateLesson(moduleId, lessonId, { description: currentDescription + '\n' + htmlToInsert }, courseId);
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const before = text.substring(0, start);
+    const after = text.substring(end, text.length);
+    const newDescription = before + htmlToInsert + after;
+
+    updateLesson(moduleId, lessonId, { description: newDescription }, courseId);
+
+    // Restore focus and cursor position after React re-render
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + htmlToInsert.length, start + htmlToInsert.length);
+    }, 0);
   };
 
   const addModule = (courseId?: string) => {
@@ -1088,7 +1109,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
     currentImageTarget.current = null;
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     const target = currentUploadTarget.current;
     if (!files || !target) return;
@@ -1116,57 +1137,38 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
       return;
     }
 
-    const newMaterials: Material[] = [];
+    setIsUploading(true);
     const filesArray = Array.from(files).slice(0, remainingSlots) as File[];
+    const newMaterials: Material[] = [];
 
-    filesArray.forEach(file => {
+    for (const file of filesArray) {
       const extension = file.name.split('.').pop()?.toLowerCase();
       if (!extension || !allowedExtensions.includes(extension)) {
         alert(`Formato de arquivo não permitido: ${file.name}`);
-        return;
+        continue;
       }
       if (file.size > MAX_FILE_SIZE) {
         alert(`O arquivo ${file.name} excede o limite de 100MB.`);
-        return;
+        continue;
       }
 
-      const fileUrl = URL.createObjectURL(file);
-      newMaterials.push({
-        id: `mat-${Date.now()}-${Math.random()}`,
-        name: file.name,
-        url: fileUrl
-      });
-    });
-
-    if (newMaterials.length > 0) {
-      if (target.courseId) {
-        setFormData(prev => ({
-          ...prev,
-          upsellCourses: prev.upsellCourses.map(u => u.id === target.courseId ? {
-            ...u,
-            modules: u.modules.map(m => m.id === target.modId ? {
-              ...m,
-              lessons: m.lessons.map(l => l.id === target.lessonId ? { 
-                ...l, 
-                materials: [...(l.materials || []), ...newMaterials] 
-              } : l)
-            } : m)
-          } : u)
-        }));
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          modules: prev.modules.map(m => m.id === target.modId ? {
-            ...m,
-            lessons: m.lessons.map(l => l.id === target.lessonId ? { 
-              ...l, 
-              materials: [...(l.materials || []), ...newMaterials] 
-            } : l)
-          } : m)
-        }));
+      const fileUrl = await uploadToBunny(file);
+      if (fileUrl) {
+        newMaterials.push({
+          id: `mat-${Date.now()}-${Math.random()}`,
+          name: file.name,
+          url: fileUrl
+        });
       }
     }
-    
+
+    if (newMaterials.length > 0) {
+      const updatedMaterials = [...(lesson.materials || []), ...newMaterials];
+      updateLesson(target.modId, target.lessonId, { materials: updatedMaterials }, target.courseId);
+      alert(`${newMaterials.length} arquivo(s) carregado(s) com SUCESSO!`);
+    }
+
+    setIsUploading(false);
     e.target.value = '';
     currentUploadTarget.current = null;
   };
@@ -1254,12 +1256,13 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
                   <label className="text-xs font-black text-white/40 uppercase tracking-widest">Nome do Treinamento</label>
                   <input 
                     type="text" 
-                    value={formData.title || ''} 
+                    value={formData.name || ''} 
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
-                      title: e.target.value
+                      name: e.target.value
                     }))} 
                     className="w-full bg-black border border-white/10 rounded-lg px-4 md:px-5 py-3 md:py-4 text-white focus:border-amber-500 outline-none text-sm md:text-base" 
+                    placeholder="Nome do Treinamento"
                   />
                 </div>
                 <div className="space-y-3">

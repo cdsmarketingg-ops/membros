@@ -23,7 +23,7 @@ const App: React.FC = () => {
       try {
         console.log('🔥 carregando curso...');
 
-        const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
+        const res = await fetch('/api/admin/config?t=' + Date.now());
         const data = await res.json();
 
         console.log('🔥 COURSE:', data);
@@ -49,7 +49,7 @@ const App: React.FC = () => {
 
   const checkSession = async () => {
     try {
-      const response = await fetch('https://api.rafaelpedrozo.online/api/auth/session');
+      const response = await fetch('/api/auth/session');
       const data = await response.json();
 
       if (data.authenticated) {
@@ -87,7 +87,7 @@ const App: React.FC = () => {
     try {
       console.log('🔥 ENVIANDO:', newData);
 
-      const response = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
+      const response = await fetch('/api/admin/config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -100,13 +100,18 @@ const App: React.FC = () => {
 
       if (!response.ok) throw new Error('Erro ao salvar');
 
-      // 🔥 ESSA PARTE RESOLVE SEU BUG
-      const resReload = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
+      // 🔥 ATUALIZA LOCALMENTE IMEDIATAMENTE PARA EVITAR "REVERT"
+      setCourseData(newData);
+
+      // 🔥 RELOAD DE SEGURANÇA (BACKGROUND)
+      const resReload = await fetch('/api/admin/config?t=' + Date.now());
       const dataReload = await resReload.json();
 
-      console.log('🔥 RELOAD:', dataReload);
-
-      setCourseData(dataReload);
+      console.log('🔥 RELOAD (SYNC):', dataReload);
+      
+      if (dataReload && Object.keys(dataReload).length > 0) {
+        setCourseData(dataReload);
+      }
 
     } catch (error) {
       console.error('❌ erro ao salvar:', error);
