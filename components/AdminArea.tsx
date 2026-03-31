@@ -185,18 +185,22 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
   } | null>(null);
 
   // Initial sync of formData when course prop is available
- useEffect(() => {
+useEffect(() => {
   const loadConfig = async () => {
     try {
       const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
       const data = await res.json();
 
-      if (data && Object.keys(data).length > 0) {
-        setFormData({
-          ...data,
-          notifications: data.notifications || []
-        });
-      }
+      const safeData = {
+        title: data.title || "",
+        description: data.description || "",
+        modules: data.modules || [],
+        theme: data.theme || {},
+        notifications: data.notifications || []
+      };
+
+      setFormData(safeData);
+
     } catch (err) {
       console.error('Erro ao carregar config:', err);
     }
@@ -204,6 +208,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
 
   loadConfig();
 }, []);
+
   const [expandedModule, setExpandedModule] = useState<string | null>(formData.modules[0]?.id || null);
   const [expandedLessonSections, setExpandedLessonSections] = useState<Record<string, string | null>>({});
   
