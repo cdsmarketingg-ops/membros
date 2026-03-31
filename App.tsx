@@ -97,7 +97,7 @@ useEffect(() => {
 
     if (!response.ok) throw new Error('Erro ao salvar');
 
-    // 🔥 BUSCA ATUALIZADO DO BACKEND (ESSENCIAL)
+    // 🔥 BUSCA ATUALIZADO
     const resReload = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
     const dataReload = await resReload.json();
 
@@ -109,6 +109,7 @@ useEffect(() => {
     console.error('Erro saving config:', error);
   }
 };
+
 
   try {
     const response = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
