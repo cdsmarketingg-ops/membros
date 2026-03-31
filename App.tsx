@@ -41,7 +41,7 @@ const App: React.FC = () => {
 
   const checkSession = async () => {
     try {
-      const response = await fetch('/api/auth/session', { credentials: 'include' });
+      const response = await fetch('/api/auth/session');
       const data = await response.json();
       if (data.authenticated) {
         setIsAuthenticated(true);
@@ -63,7 +63,7 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      await fetch('/api/auth/logout', { method: 'POST' });
       setIsAuthenticated(false);
       setUserEmail(null);
     } catch (e) {
@@ -80,14 +80,13 @@ const App: React.FC = () => {
       const response = await fetch('/api/admin/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newData),
-        credentials: 'include'
+        body: JSON.stringify(newData)
       });
       if (!response.ok) throw new Error('Failed to save config');
-      return true;
     } catch (error) {
       console.error("Error saving config:", error);
-      return false;
+      // We don't revert here to avoid the "returning automatically" frustration, 
+      // but in a production app you might want to show an error toast.
     }
   };
 
