@@ -7,7 +7,7 @@ import AdminArea from './components/AdminArea';
 import Login from './components/Login';
 import { ChevronLeft, User, Bell, Search, Settings, LogOut, Loader2 } from 'lucide-react';
 import { db } from './src/firebase';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+
 
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('student');
@@ -18,22 +18,29 @@ const App: React.FC = () => {
   const [courseData, setCourseData] = useState<CourseConfig>(INITIAL_COURSE_DATA);
 
   // Load course config from Firestore
-  useEffect(() => {
-    const configRef = doc(db, 'config', 'main');
-    
-    const unsubscribe = onSnapshot(configRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data() as CourseConfig;
+useEffect(() => {
+  const loadCourse = async () => {
+    try {
+      console.log('🔥 carregando curso da API...');
+
+      const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
+      const data = await res.json();
+
+      console.log('🔥 COURSE RECEBIDO:', data);
+
+      if (data && Object.keys(data).length > 0) {
         setCourseData(data);
       }
-      setLoadingConfig(false);
-    }, (error) => {
-      console.error("Error loading config:", error);
-      setLoadingConfig(false);
-    });
 
-    return () => unsubscribe();
-  }, []);
+    } catch (err) {
+      console.error('❌ erro ao carregar curso:', err);
+    } finally {
+      setLoadingConfig(false);
+    }
+  };
+
+  loadCourse();
+}, []);
 
   useEffect(() => {
     checkSession();
@@ -74,22 +81,34 @@ const App: React.FC = () => {
   const isAdmin = userEmail === 'cdsmarketingg@gmail.com';
 
   const handleUpdateCourse = async (newData: CourseConfig) => {
-    setCourseData(newData);
-    // Save to Firestore via Server API to bypass client-side auth limits and ensure "total control"
-    try {
-      const response = await fetch('/api/admin/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newData)
-      });
-      if (!response.ok) throw new Error('Failed to save config');
-    } catch (error) {
-      console.error("Error saving config:", error);
-      // We don't revert here to avoid the "returning automatically" frustration, 
-      // but in a production app you might want to show an error toast.
-    }
-  };
+  setCourseData(newData);
 
+  try {
+   const handleUpdateCourse = async (newData: CourseConfig) => {
+  setCourseData(newData);
+
+  try {
+    const response = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newData)
+    });
+
+    const result = await response.json();
+
+    console.log('🔥 SALVO:', result);
+
+    if (!response.ok) throw new Error('Erro ao salvar');
+
+    // 🔥 força atualização imediata
+    setCourseData(newData);
+
+  } catch (error) {
+    console.error('Erro saving config:', error);
+  }
+};
   if (isAuthenticated === null || loadingConfig) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">

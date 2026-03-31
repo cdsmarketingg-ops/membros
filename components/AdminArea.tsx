@@ -200,10 +200,11 @@ useEffect(() => {
 
       // 🔥 só atualiza se vier algo
       if (data && Object.keys(data).length > 0) {
-        setFormData({
-          ...data,
-          notifications: data.notifications || []
-        });
+        setFormData(prev => ({
+  ...prev,
+  ...data,
+  notifications: data.notifications || []
+}));
       }
 
     } catch (err) {
