@@ -14,33 +14,28 @@ const App: React.FC = () => {
   const [userProducts, setUserProducts] = useState<string[]>([]);
   const [loadingConfig, setLoadingConfig] = useState(true);
 
-  // ✅ ÚNICO estado do curso (fonte da verdade)
   const [courseData, setCourseData] = useState<CourseConfig>(INITIAL_COURSE_DATA);
 
-  // Load course config from Firestore
-useEffect(() => {
-  const loadCourse = async () => {
-    try {
-      console.log('🔥 carregando curso da API...');
-
-      const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
-      const data = await res.json();
-
-      console.log('🔥 COURSE RECEBIDO:', data);
-
-      if (data && Object.keys(data).length > 0) {
-        setCourseData(data);
+  useEffect(() => {
+    const loadCourse = async () => {
+      try {
+        console.log('🔥 carregando curso da API...');
+        const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
+          credentials: 'include'
+        });
+        const data = await res.json();
+        console.log('🔥 COURSE RECEBIDO:', data);
+        if (data && Object.keys(data).length > 0) {
+          setCourseData(data);
+        }
+      } catch (err) {
+        console.error('❌ erro ao carregar curso:', err);
+      } finally {
+        setLoadingConfig(false);
       }
-
-    } catch (err) {
-      console.error('❌ erro ao carregar curso:', err);
-    } finally {
-      setLoadingConfig(false);
-    }
-  };
-
-  loadCourse();
-}, []);
+    };
+    loadCourse();
+  }, []);
 
   useEffect(() => {
     checkSession();
@@ -48,7 +43,9 @@ useEffect(() => {
 
   const checkSession = async () => {
     try {
-      const response = await fetch('https://api.rafaelpedrozo.online/membros/auth/session');
+      const response = await fetch('https://api.rafaelpedrozo.online/membros/auth/session', {
+        credentials: 'include'
+      });
       const data = await response.json();
       if (data.authenticated) {
         setIsAuthenticated(true);
@@ -70,7 +67,10 @@ useEffect(() => {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await fetch('https://api.rafaelpedrozo.online/membros/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
       setIsAuthenticated(false);
       setUserEmail(null);
     } catch (e) {
@@ -80,55 +80,47 @@ useEffect(() => {
 
   const isAdmin = userEmail === 'cdsmarketingg@gmail.com';
 
- const handleUpdateCourse = async (newData: CourseConfig) => {
-  try {
-    const response = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newData)
-    });
+  const handleUpdateCourse = async (newData: CourseConfig) => {
+    try {
+      const response = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(newData)
+      });
 
-    const result = await response.json();
+      const result = await response.json();
+      console.log('🔥 SALVO:', result);
+      if (!response.ok) throw new Error('Erro ao salvar');
 
-    console.log('🔥 SALVO:', result);
+      const resReload = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
+        credentials: 'include'
+      });
+      const dataReload = await resReload.json();
+      console.log('🔥 RELOAD:', dataReload);
+      setCourseData(dataReload);
 
-    if (!response.ok) throw new Error('Erro ao salvar');
-
-    // 🔥 BUSCA ATUALIZADO
-    const resReload = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
-    const dataReload = await resReload.json();
-
-    console.log('🔥 RELOAD:', dataReload);
-
-    setCourseData(dataReload);
-    
-
-  } catch (error) {
-    console.error('Erro saving config:', error);
-  }
-};
-
+    } catch (error) {
+      console.error('Erro saving config:', error);
+    }
+  };
 
   if (isAuthenticated === null || loadingConfig) {
-  return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-      <Loader2 className="text-amber-500 animate-spin" size={40} />
-    </div>
-  );
-}
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <Loader2 className="text-amber-500 animate-spin" size={40} />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
-  // Security check: if not admin, force student view
   const currentView = isAdmin ? view : 'student';
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black">
-      {/* Top Bar Producer Style */}
       <header className="fixed top-0 left-0 right-0 z-[100] h-14 bg-[#111] border-b border-white/10 flex items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2 md:gap-4">
           <button 
@@ -155,7 +147,6 @@ useEffect(() => {
                 <div className="h-6 w-[1px] bg-white/10 mx-1 hidden xs:block" />
               </>
             )}
-            
             <div className="flex items-center gap-2">
               <span className="text-white/40 text-[10px] md:text-xs hidden md:inline">{userEmail}</span>
               <button 
@@ -170,7 +161,6 @@ useEffect(() => {
         </div>
       </header>
 
-      {/* Main Area */}
       <main className="flex-1 mt-14 overflow-hidden">
         {currentView === 'student' ? (
           <StudentArea course={courseData} userProducts={userProducts} />
