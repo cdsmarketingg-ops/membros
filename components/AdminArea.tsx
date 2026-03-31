@@ -198,15 +198,13 @@ useEffect(() => {
       const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config');
       const data = await res.json();
 
-      const safeData = {
-        title: data.title || "",
-        description: data.description || "",
-        modules: data.modules || [],
-        theme: data.theme || {},
-        notifications: data.notifications || []
-      };
-
-      setFormData(safeData);
+      // 🔥 só atualiza se vier algo
+      if (data && Object.keys(data).length > 0) {
+        setFormData({
+          ...data,
+          notifications: data.notifications || []
+        });
+      }
 
     } catch (err) {
       console.error('Erro ao carregar config:', err);
@@ -215,7 +213,6 @@ useEffect(() => {
 
   loadConfig();
 }, []);
-
   const [expandedModule, setExpandedModule] = useState<string | null>(formData.modules[0]?.id || null);
   const [expandedLessonSections, setExpandedLessonSections] = useState<Record<string, string | null>>({});
   
@@ -263,7 +260,9 @@ useEffect(() => {
     }
   };
 
-  const handleSave = async () => {
+ const handleSave = async () => {
+  console.log("🔥 HANDLE SAVE DISPARADO", formData);
+
   try {
     const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
       method: 'POST',
@@ -274,16 +273,16 @@ useEffect(() => {
     });
 
     const result = await res.json();
+    console.log("✅ RESPOSTA API:", result);
 
     if (!res.ok) {
       throw new Error(result.error || 'Erro ao salvar');
     }
 
-    setShowSaveToast(true);
-    setTimeout(() => setShowSaveToast(false), 3000);
+    alert("✅ Salvo com sucesso!");
 
   } catch (err) {
-    console.error('Erro ao salvar config:', err);
+    console.error('❌ Erro ao salvar config:', err);
     alert('Erro ao salvar no servidor');
   }
 };
