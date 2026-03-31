@@ -65,6 +65,7 @@ export interface CourseConfig {
   language?: 'pt' | 'es';
   modules: Module[];
   upsellCourses: UpsellCourse[];
+  notifications?: Notification[];
 }
 
 export type AppView = 'student' | 'admin';

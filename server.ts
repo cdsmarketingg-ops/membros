@@ -20,7 +20,7 @@ admin.initializeApp({
   projectId: firebaseConfig.projectId
 });
 
-const db = admin.firestore();
+const db = admin.firestore(firebaseConfig.firestoreDatabaseId);
 const JWT_SECRET = process.env.JWT_SECRET || 'nexus-lms-secret-key';
 
 const upload = multer({ 

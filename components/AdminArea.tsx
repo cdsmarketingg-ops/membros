@@ -12,7 +12,7 @@ import { collection, query, getDocs, doc, deleteDoc, setDoc, Timestamp } from 'f
 
 interface AdminAreaProps {
   course: CourseConfig;
-  onUpdate: (newData: CourseConfig) => void;
+  onUpdate: (newData: CourseConfig) => Promise<boolean>;
 }
 
 const getAutoThumbnail = (videoUrl: string) => {
@@ -89,7 +89,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
   const fetchBunnyFiles = async () => {
     setLoadingBunny(true);
     try {
-      const response = await fetch('/api/admin/files');
+      const response = await fetch('/api/admin/files', { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
         setBunnyFiles(data);
@@ -112,7 +112,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
   const fetchStudents = async () => {
     setLoadingStudents(true);
     try {
-      const response = await fetch('/api/admin/students');
+      const response = await fetch('/api/admin/students', { credentials: 'include' });
       if (response.ok) {
         const studentList = await response.json();
         setStudents(studentList);
@@ -139,7 +139,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
       const response = await fetch('/api/admin/students', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email }),
+        credentials: 'include'
       });
       if (response.ok) {
         setNewStudentEmail('');
@@ -160,7 +161,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
       onConfirm: async () => {
         try {
           const response = await fetch(`/api/admin/students/${email}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            credentials: 'include'
           });
           if (response.ok) {
             fetchStudents();
@@ -178,6 +180,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
     notifications: course.notifications || []
   });
   const [showSaveToast, setShowSaveToast] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<{
     title: string;
     message: string;
@@ -190,7 +193,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
       ...course,
       notifications: course.notifications || []
     });
-  }, []);
+  }, [course]);
   const [expandedModule, setExpandedModule] = useState<string | null>(formData.modules[0]?.id || null);
   const [expandedLessonSections, setExpandedLessonSections] = useState<Record<string, string | null>>({});
   
@@ -213,14 +216,13 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
 
     setIsSendingNotif(true);
     try {
-      const token = localStorage.getItem('nexus_admin_token');
       const response = await fetch('/api/admin/notify', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(notifForm),
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -238,10 +240,22 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
     }
   };
 
-  const handleSave = () => {
-    onUpdate(formData);
-    setShowSaveToast(true);
-    setTimeout(() => setShowSaveToast(false), 3000);
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const success = await onUpdate(formData);
+      if (success) {
+        setShowSaveToast(true);
+        setTimeout(() => setShowSaveToast(false), 3000);
+      } else {
+        alert("Erro ao salvar as alterações. Verifique sua conexão ou permissões.");
+      }
+    } catch (error) {
+      console.error("Error in handleSave:", error);
+      alert("Ocorreu um erro inesperado ao salvar.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const toggleLessonSection = (lessonId: string, section: string) => {
@@ -1219,9 +1233,15 @@ const AdminArea: React.FC<AdminAreaProps> = ({ course, onUpdate }) => {
         </div>
         <button 
           onClick={handleSave}
-          className="w-full md:w-auto bg-amber-500 text-black px-8 md:px-12 py-3 md:py-4 rounded font-black hover:bg-white transition-all shadow-xl shadow-amber-500/10 flex items-center justify-center gap-3 text-sm md:text-base"
+          disabled={isSaving}
+          className={`w-full md:w-auto bg-amber-500 text-black px-8 md:px-12 py-3 md:py-4 rounded font-black hover:bg-white transition-all shadow-xl shadow-amber-500/10 flex items-center justify-center gap-3 text-sm md:text-base ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <Save size={20} /> SALVAR ALTERAÇÕES
+          {isSaving ? (
+            <Loader2 className="animate-spin" size={20} />
+          ) : (
+            <Save size={20} />
+          )}
+          {isSaving ? 'SALVANDO...' : 'SALVAR ALTERAÇÕES'}
         </button>
       </div>
 

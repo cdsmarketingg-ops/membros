@@ -18,7 +18,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setError(null);
 
     try {
-      const response = await fetch('https://api.rafaelpedrozo.online/membros/admin-login', {
+      // First check with the local API to set the session cookie
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -26,10 +27,10 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
       const data = await response.json();
 
-      if (data.admin) {
-        onLoginSuccess(email, []);
+      if (response.ok && data.success) {
+        onLoginSuccess(email, data.products || []);
       } else {
-        setError('Acesso negado.');
+        setError(data.error || 'Acesso negado.');
       }
 
     } catch (err) {
