@@ -21,15 +21,16 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       const response = await fetch('https://api.rafaelpedrozo.online/membros/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
 
-      if (data.admin) {
-        onLoginSuccess(email, []);
+      if (data.success) {
+        onLoginSuccess(data.email, data.products || []);
       } else {
-        setError('Acesso negado.');
+        setError(data.error || 'Acesso negado. Verifique se sua compra foi aprovada.');
       }
 
     } catch (err) {
@@ -42,7 +43,6 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-amber-500/10 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-amber-500/5 blur-[120px] rounded-full" />
 
@@ -99,7 +99,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-top border-white/5 text-center">
+          <div className="mt-8 pt-6 border-t border-white/5 text-center">
             <p className="text-white/30 text-xs">
               Problemas com o acesso? <a href="#" className="text-amber-500/60 hover:text-amber-500 underline">Fale com o suporte</a>
             </p>
