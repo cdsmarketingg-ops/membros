@@ -111,25 +111,6 @@ useEffect(() => {
 };
 
 
-  try {
-    const response = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newData)
-    });
-
-    const result = await response.json();
-
-    console.log('🔥 SALVO:', result);
-
-    if (!response.ok) throw new Error('Erro ao salvar');
-
-  } catch (error) {
-    console.error('Erro saving config:', error);
-  }
-};
   if (isAuthenticated === null || loadingConfig) {
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
