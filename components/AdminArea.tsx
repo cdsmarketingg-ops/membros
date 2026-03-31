@@ -8,7 +8,7 @@ import {
   Link as LinkIcon, Link2, Minus, Type, MessageCircle, Rocket, Upload, FileText, X, Settings2, EyeOff, Eye, Loader2, ShoppingCart, Bell, Users, Search as SearchIcon
 } from 'lucide-react';
 import { db } from '../src/firebase';
-import { collection, query, getDocs, doc, deleteDoc, setDoc, Timestamp } from 'firebase/firestore';
+
 
 interface AdminAreaProps {
   course: CourseConfig;
@@ -18,24 +18,31 @@ interface AdminAreaProps {
 const getAutoThumbnail = (videoUrl: string) => {
   if (!videoUrl) return '';
   
-  // YouTube
-  if (videoUrl.includes('youtube.com/watch?v=')) {
-    const id = videoUrl.split('v=')[1]?.split('&')[0];
+// YouTube
+if (videoUrl?.includes('youtube.com/watch?v=')) {
+  const id = videoUrl.split('v=')[1]?.split('&')?.[0];
+  if (id) {
     return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
   }
-  if (videoUrl.includes('youtu.be/')) {
-    const id = videoUrl.split('youtu.be/')[1]?.split('?')[0];
+}
+
+if (videoUrl?.includes('youtu.be/')) {
+  const id = videoUrl.split('youtu.be/')[1]?.split('?')?.[0];
+  if (id) {
     return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
   }
-  
-  // Vimeo
-  if (videoUrl.includes('vimeo.com/')) {
-    const parts = videoUrl.split('vimeo.com/')[1];
-    const id = parts.split('?')[0].split('/')[0];
+}
+
+// Vimeo
+if (videoUrl?.includes('vimeo.com/')) {
+  const parts = videoUrl.split('vimeo.com/')[1];
+  const id = parts?.split('?')?.[0]?.split('/')?.[0];
+  if (id) {
     return `https://vumbnail.com/${id}.jpg`;
   }
-  
-  return '';
+}
+
+return '';
 };
 
 const isDirectVideo = (url: string) => {
