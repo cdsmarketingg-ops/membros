@@ -20,9 +20,7 @@ admin.initializeApp({
   projectId: firebaseConfig.projectId
 });
 
-const db = firebaseConfig.firestoreDatabaseId 
-  ? admin.firestore(firebaseConfig.firestoreDatabaseId)
-  : admin.firestore();
+const db = admin.firestore();
 const JWT_SECRET = process.env.JWT_SECRET || 'nexus-lms-secret-key';
 
 const upload = multer({ 
@@ -315,20 +313,6 @@ async function startServer() {
   });
 
   // --- Config Endpoints ---
-  app.get('/api/admin/config', async (req, res) => {
-    try {
-      const doc = await db.collection('config').doc('main').get();
-      if (doc.exists) {
-        res.json(doc.data());
-      } else {
-        res.json({});
-      }
-    } catch (error) {
-      console.error('Error fetching config:', error);
-      res.status(500).json({ error: 'Failed to fetch configuration' });
-    }
-  });
-
   app.post('/api/admin/config', async (req, res) => {
     // Check if user is admin
     const token = req.cookies.nexus_session;
@@ -344,17 +328,14 @@ async function startServer() {
     }
 
     const configData = req.body;
-    console.log('💾 RECEBENDO CONFIG:', JSON.stringify(configData).substring(0, 200) + '...');
-
     try {
       await db.collection('config').doc('main').set({
         ...configData,
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
-      console.log('✅ CONFIG SALVA COM SUCESSO');
       res.json({ success: true });
     } catch (error) {
-      console.error('❌ Erro ao salvar config:', error);
+      console.error('Error saving config:', error);
       res.status(500).json({ error: 'Failed to save configuration' });
     }
   });
