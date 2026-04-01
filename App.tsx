@@ -6,6 +6,9 @@ import AdminArea from './components/AdminArea';
 import Login from './components/Login';
 import { ChevronLeft, User, Bell, Search, Settings, LogOut, Loader2 } from 'lucide-react';
 
+// 🔥 Sessão expira em 7 dias (igual ao cookie)
+const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000;
+
 const App: React.FC = () => {
 
   const [view, setView] = useState<AppView>('student');
@@ -19,12 +22,10 @@ const App: React.FC = () => {
   useEffect(() => {
     const loadCourse = async () => {
       try {
-        console.log('🔥 carregando curso da API...');
         const res = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
           credentials: 'include'
         });
         const data = await res.json();
-        console.log('🔥 COURSE RECEBIDO:', data);
         if (data && Object.keys(data).length > 0) {
           setCourseData(data);
         }
@@ -42,6 +43,28 @@ const App: React.FC = () => {
   }, []);
 
   const checkSession = async () => {
+    // 1️⃣ Tenta localStorage primeiro (funciona em mobile)
+    const savedEmail = localStorage.getItem('nexus_email');
+    const savedProducts = localStorage.getItem('nexus_products');
+    const savedTime = localStorage.getItem('nexus_auth_time');
+
+    if (savedEmail && savedTime) {
+      const elapsed = Date.now() - parseInt(savedTime);
+      if (elapsed < SESSION_DURATION) {
+        // Sessão local ainda válida
+        setIsAuthenticated(true);
+        setUserEmail(savedEmail);
+        setUserProducts(savedProducts ? JSON.parse(savedProducts) : []);
+        return;
+      } else {
+        // Sessão expirada — limpa
+        localStorage.removeItem('nexus_email');
+        localStorage.removeItem('nexus_products');
+        localStorage.removeItem('nexus_auth_time');
+      }
+    }
+
+    // 2️⃣ Fallback: tenta cookie (funciona em desktop)
     try {
       const response = await fetch('https://api.rafaelpedrozo.online/membros/auth/session', {
         credentials: 'include'
@@ -51,6 +74,10 @@ const App: React.FC = () => {
         setIsAuthenticated(true);
         setUserEmail(data.email);
         setUserProducts(data.products || []);
+        // Salva no localStorage para próximas visitas mobile
+        localStorage.setItem('nexus_email', data.email);
+        localStorage.setItem('nexus_products', JSON.stringify(data.products || []));
+        localStorage.setItem('nexus_auth_time', Date.now().toString());
       } else {
         setIsAuthenticated(false);
       }
@@ -66,16 +93,22 @@ const App: React.FC = () => {
   };
 
   const handleLogout = async () => {
+    // Limpa localStorage
+    localStorage.removeItem('nexus_email');
+    localStorage.removeItem('nexus_products');
+    localStorage.removeItem('nexus_auth_time');
+
     try {
       await fetch('https://api.rafaelpedrozo.online/membros/auth/logout', {
         method: 'POST',
         credentials: 'include'
       });
-      setIsAuthenticated(false);
-      setUserEmail(null);
     } catch (e) {
       console.error('Logout failed', e);
     }
+
+    setIsAuthenticated(false);
+    setUserEmail(null);
   };
 
   const isAdmin = userEmail === 'cdsmarketingg@gmail.com';
@@ -90,14 +123,12 @@ const App: React.FC = () => {
       });
 
       const result = await response.json();
-      console.log('🔥 SALVO:', result);
       if (!response.ok) throw new Error('Erro ao salvar');
 
       const resReload = await fetch('https://api.rafaelpedrozo.online/membros/admin/config', {
         credentials: 'include'
       });
       const dataReload = await resReload.json();
-      console.log('🔥 RELOAD:', dataReload);
       setCourseData(dataReload);
 
     } catch (error) {

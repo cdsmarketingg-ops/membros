@@ -28,6 +28,10 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       const data = await response.json();
 
       if (data.success) {
+        // 🔥 Salva no localStorage como fallback para mobile (Safari bloqueia cookies cross-site)
+        localStorage.setItem('nexus_email', data.email);
+        localStorage.setItem('nexus_products', JSON.stringify(data.products || []));
+        localStorage.setItem('nexus_auth_time', Date.now().toString());
         onLoginSuccess(data.email, data.products || []);
       } else {
         setError(data.error || 'Acesso negado. Verifique se sua compra foi aprovada.');
