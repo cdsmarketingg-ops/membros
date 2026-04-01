@@ -800,7 +800,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         if (locked) {
           return (
             <section key={upsell.id} className="px-4 md:px-12 py-8 md:py-12 border-t border-white/5">
-               <div className="relative w-full h-[280px] md:h-[320px] rounded-2xl md:rounded-3xl overflow-hidden group border border-white/5 hover:border-amber-500/30 transition-all">
+               <div className="relative w-full h-[280px] md:h-auto md:aspect-video md:max-w-4xl md:mx-auto rounded-2xl md:rounded-3xl overflow-hidden group border border-white/5 hover:border-amber-500/30 transition-all">
                   <img 
                     src={upsell.bannerUrl || upsell.thumbnailUrl} 
                     className="w-full h-full object-cover grayscale blur-[2px] group-hover:grayscale-0 group-hover:blur-0 transition-all duration-700" 
@@ -813,7 +813,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                       <Lock className="text-black" size={20} />
                     </div>
                     <p className="text-amber-500 font-black text-[9px] md:text-[10px] uppercase tracking-[0.4em] mb-1 md:mb-2 italic">{t('exclusiveOffer')}</p>
-                    <h2 className="text-xl md:text-3xl lg:text-4xl font-black mb-2 md:mb-4 uppercase italic tracking-tighter leading-tight px-2">{upsell.title}</h2>
+                    <h2 className="text-xl md:text-3xl lg:text-5xl font-black mb-2 md:mb-4 uppercase italic tracking-tighter leading-tight px-2">{upsell.title}</h2>
                     <p className="text-white/60 max-w-2xl mb-4 md:mb-6 text-[11px] md:text-sm lg:text-base line-clamp-2 px-4">{t('unlockMessage')}</p>
                     <button 
                       onClick={() => window.open(upsell.upsellUrl, '_blank')}
