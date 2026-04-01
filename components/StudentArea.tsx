@@ -431,27 +431,18 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                           </div>
                         </div>
                       </div>
-
-                      <button 
-                        onClick={() => {
-                          const supportUrl = activeCourseId === 'main' 
-                            ? course.supportUrl 
-                            : (course.upsellCourses?.find(u => u.id === activeCourseId)?.supportUrl || course.supportUrl);
-                          window.open(supportUrl, '_blank');
-                        }}
-                        className="px-8 py-4 bg-white text-black font-black rounded-xl hover:bg-amber-500 transition-all shadow-2xl text-xs tracking-widest uppercase italic flex items-center gap-3"
-                      >
-                        <MessageCircle size={18} /> {t('premiumSupport')}
-                      </button>
                     </div>
 
                     {/* LESSON DESCRIPTION */}
-                    <div className="mb-12">
-                      <h3 className="text-lg font-black mb-6 uppercase italic tracking-widest flex items-center gap-3">
-                        <List size={20} className="text-amber-500" /> {t('lessonDescription')}
+                    <div className="mb-12 bg-white/[0.02] border border-white/5 rounded-3xl p-6 md:p-10 shadow-inner">
+                      <h3 className="text-xl md:text-3xl font-black mb-8 uppercase italic tracking-tighter flex items-center gap-4 text-white">
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
+                          <List size={24} className="text-black" />
+                        </div>
+                        {t('lessonDescription')}
                       </h3>
                       <div 
-                        className="prose prose-invert max-w-none text-white/60 leading-relaxed lesson-content-html"
+                        className="prose prose-invert max-w-none text-white/70 leading-relaxed lesson-content-html text-sm md:text-base"
                         dangerouslySetInnerHTML={{ __html: selectedLesson.description }}
                       />
                     </div>
