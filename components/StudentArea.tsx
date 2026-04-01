@@ -411,7 +411,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                   <div className="flex-1">
                     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-8 border-b border-white/5 pb-8">
                       <div>
-                        <h1 className="text-3xl lg:text-4xl font-black mb-4 uppercase italic tracking-tighter text-white">
+                        <h1 className="text-lg md:text-4xl font-black mb-4 uppercase italic tracking-tighter text-white leading-tight">
                           {selectedLesson.title}
                         </h1>
                         <div className="flex items-center gap-6">
@@ -571,7 +571,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
           <div className="absolute bottom-6 md:bottom-12 left-6 md:left-12">
             <p className="text-amber-500 font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] mb-2 md:mb-4 italic">{t('selectedModule')}</p>
-            <h1 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase italic tracking-tighter leading-none">{selectedModule?.title}</h1>
+            <h1 className="text-xl md:text-4xl lg:text-6xl font-black uppercase italic tracking-tighter leading-none">{selectedModule?.title}</h1>
             <p className="text-white/40 text-xs md:text-sm mt-2 md:mt-4 font-bold uppercase tracking-widest">{selectedModule?.lessons.length} {t('lessonsAvailable')}</p>
           </div>
         </div>
@@ -603,9 +603,9 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                     <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{lesson.duration}</span>
                   </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="font-black text-lg uppercase italic tracking-tighter group-hover:text-amber-500 transition-colors line-clamp-1">{lesson.title}</h3>
-                  <p className="text-white/40 text-xs mt-2 line-clamp-2 leading-relaxed">{lesson.description.replace(/<[^>]*>?/gm, '')}</p>
+                <div className="p-4 md:p-6">
+                  <h3 className="font-black text-xs md:text-lg uppercase italic tracking-tighter group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight">{lesson.title}</h3>
+                  <p className="text-white/40 text-[10px] md:text-xs mt-2 line-clamp-2 leading-relaxed">{lesson.description.replace(/<[^>]*>?/gm, '')}</p>
                 </div>
               </div>
             ))}
@@ -731,7 +731,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
         <div className="absolute bottom-8 md:bottom-12 left-6 md:left-12 max-w-2xl">
           <p className="text-amber-500 font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] mb-2 md:mb-4 italic">{t('restrictedAccess')}</p>
-          <h1 className="text-3xl md:text-5xl lg:text-8xl font-black mb-4 md:mb-8 drop-shadow-2xl uppercase italic tracking-tighter leading-none">{course.name}</h1>
+          <h1 className="text-3xl md:text-5xl lg:text-8xl font-black mb-4 md:mb-8 drop-shadow-2xl uppercase italic tracking-tighter leading-tight md:leading-none">{course.name}</h1>
           <button 
             onClick={() => enterModule(course.modules[0])}
             className="px-8 md:px-12 py-4 md:py-5 bg-white text-black font-black rounded-xl flex items-center gap-3 md:gap-4 hover:bg-amber-500 transition-all shadow-2xl scale-100 hover:scale-105 active:scale-95 text-[10px] md:text-xs tracking-widest italic uppercase"
@@ -772,10 +772,10 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                   {!mod.hideTitle && (
                     <>
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
-                      <div className="absolute bottom-6 left-6 right-6">
-                        <h3 className="font-black text-base lg:text-xl leading-tight drop-shadow-2xl text-white group-hover:text-amber-500 transition-colors uppercase italic tracking-tighter">{mod.title}</h3>
-                        <div className="flex items-center justify-between mt-3">
-                          <span className="text-[10px] text-white/40 font-black uppercase tracking-widest">{mod.lessons.length} {t('lessonsCount')}</span>
+                      <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6">
+                        <h3 className="font-black text-sm lg:text-xl leading-tight drop-shadow-2xl text-white group-hover:text-amber-500 transition-colors uppercase italic tracking-tighter">{mod.title}</h3>
+                        <div className="flex items-center justify-between mt-2 md:mt-3">
+                          <span className="text-[9px] md:text-[10px] text-white/40 font-black uppercase tracking-widest">{mod.lessons.length} {t('lessonsCount')}</span>
                         </div>
                       </div>
                     </>
@@ -819,9 +819,9 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                     <div className="w-10 h-10 md:w-20 md:h-20 bg-amber-500 rounded-full flex items-center justify-center mb-3 md:mb-6 shadow-2xl shadow-amber-500/20">
                       <Lock className="text-black" size={20} md:size={24} />
                     </div>
-                    <p className="text-amber-500 font-black text-[7px] md:text-[10px] uppercase tracking-[0.4em] mb-1 md:mb-4 italic">{t('exclusiveOffer')}</p>
-                    <h2 className="text-lg md:text-4xl lg:text-6xl font-black mb-2 md:mb-6 uppercase italic tracking-tighter leading-tight px-2">{upsell.title}</h2>
-                    <p className="text-white/60 max-w-2xl mb-4 md:mb-10 text-[10px] md:text-sm lg:text-base line-clamp-2 px-4">{upsell.description}</p>
+                    <p className="text-amber-500 font-black text-[9px] md:text-[10px] uppercase tracking-[0.4em] mb-1 md:mb-4 italic">{t('exclusiveOffer')}</p>
+                    <h2 className="text-2xl md:text-4xl lg:text-6xl font-black mb-2 md:mb-6 uppercase italic tracking-tighter leading-tight px-2">{upsell.title}</h2>
+                    <p className="text-white/60 max-w-2xl mb-4 md:mb-10 text-[11px] md:text-sm lg:text-base line-clamp-2 px-4">{upsell.description}</p>
                     <button 
                       onClick={() => window.open(upsell.upsellUrl, '_blank')}
                       className="px-6 md:px-12 py-3 md:py-5 bg-amber-500 text-black font-black rounded-lg md:rounded-xl flex items-center gap-2 md:gap-4 hover:bg-white transition-all shadow-2xl text-[9px] md:text-xs tracking-widest italic uppercase"
@@ -839,8 +839,8 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-16 gap-6 md:gap-0">
               <div>
                 <p className="text-amber-500 font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] mb-1 md:mb-2 italic">{t('additionalCourse')}</p>
-                <h2 className="text-xl md:text-3xl font-black uppercase italic tracking-tight flex items-center gap-2 md:gap-4">
-                  {upsell.title} <span className="text-white/10 font-light text-[10px] md:text-sm not-italic">({upsell.modules.length} {t('modules').toLowerCase()})</span>
+                <h2 className="text-lg md:text-3xl font-black uppercase italic tracking-tight flex items-center gap-2 md:gap-4">
+                  {upsell.title} <span className="text-white/10 font-light text-[9px] md:text-sm not-italic">({upsell.modules.length} {t('modules').toLowerCase()})</span>
                 </h2>
                 {upsell.instructorName && <p className="text-white/40 text-[10px] md:text-xs mt-1 md:mt-2 font-bold uppercase tracking-widest italic">{t('instructor')} {upsell.instructorName}</p>}
               </div>
