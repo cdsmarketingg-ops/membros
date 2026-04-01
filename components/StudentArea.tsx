@@ -481,6 +481,15 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
               </div>
             )}
           </div>
+          {/* STUDENT FOOTER */}
+          <footer className="px-6 py-6 bg-[#0a0a0a] border-t border-white/5 mt-8">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+              <div className="flex flex-col md:flex-row items-center gap-3">
+                <img src={course.logoUrl} className="w-6 h-6 rounded grayscale opacity-20 border border-white/10" alt="Logo grayscale" />
+                <p className="text-white/10 text-[9px] uppercase font-black tracking-[0.2em]">© 2026 {course.name} • {t('allRightsReserved')}</p>
+              </div>
+            </div>
+          </footer>
         </main>
       </div>
     );
@@ -604,6 +613,15 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
             ))}
           </div>
         </section>
+        {/* STUDENT FOOTER */}
+        <footer className="px-6 py-6 bg-[#0a0a0a] border-t border-white/5 mt-8">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+            <div className="flex flex-col md:flex-row items-center gap-3">
+              <img src={course.logoUrl} className="w-6 h-6 rounded grayscale opacity-20 border border-white/10" alt="Logo grayscale" />
+              <p className="text-white/10 text-[9px] uppercase font-black tracking-[0.2em]">© 2026 {course.name} • {t('allRightsReserved')}</p>
+            </div>
+          </div>
+        </footer>
       </div>
     );
   }
@@ -924,11 +942,11 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
       })}
 
       {/* STUDENT FOOTER */}
-      <footer className="px-12 py-20 bg-[#111] border-t border-white/5 mt-20">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-          <div className="flex flex-col items-center lg:items-start gap-4">
-            <img src={course.logoUrl} className="w-12 h-12 rounded-xl grayscale opacity-30 shadow-2xl border border-white/5" alt="Logo grayscale" />
-            <p className="text-white/20 text-[10px] uppercase font-black tracking-[0.2em]">© 2026 {course.name} • {t('allRightsReserved')}</p>
+      <footer className="px-6 py-6 bg-[#0a0a0a] border-t border-white/5 mt-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+          <div className="flex flex-col md:flex-row items-center gap-3">
+            <img src={course.logoUrl} className="w-6 h-6 rounded grayscale opacity-20 border border-white/10" alt="Logo grayscale" />
+            <p className="text-white/10 text-[9px] uppercase font-black tracking-[0.2em]">© 2026 {course.name} • {t('allRightsReserved')}</p>
           </div>
         </div>
       </footer>
