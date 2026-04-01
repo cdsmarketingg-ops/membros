@@ -66,8 +66,8 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         resumeTraining: 'RETOMAR TREINAMENTO',
         courseModules: 'Módulos do Curso',
         lessonsCount: 'aulas',
-        exclusiveOffer: 'Oferta Exclusiva',
-        getAccessNow: 'QUERO ACESSO AGORA',
+        exclusiveOffer: 'Produto Bloqueado',
+        getAccessNow: 'QUERO DESBLOQUEAR AGORA',
         additionalCourse: 'Curso Adicional',
         resumeCourse: 'RETOMAR CURSO',
         selectLessonToStart: 'Selecione uma aula para começar',
@@ -76,6 +76,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         lessonMaterials: 'Materiais da Aula',
         studentSupport: 'Suporte ao Aluno',
         noModulesAvailable: 'Nenhum módulo disponível ainda',
+        unlockMessage: 'Para desbloquear realize a compra do produto',
         allRightsReserved: 'Todos os direitos reservados'
       },
       es: {
@@ -119,8 +120,8 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         resumeTraining: 'REANUDAR ENTRENAMIENTO',
         courseModules: 'Módulos del Curso',
         lessonsCount: 'clases',
-        exclusiveOffer: 'Oferta Exclusiva',
-        getAccessNow: 'QUIERO ACCESO AHORA',
+        exclusiveOffer: 'Producto Bloqueado',
+        getAccessNow: 'QUIERO DESBLOQUEAR AHORA',
         additionalCourse: 'Curso Adicional',
         resumeCourse: 'REANUDAR CURSO',
         selectLessonToStart: 'Selecciona una clase para comenzar',
@@ -129,6 +130,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         lessonMaterials: 'Materiales de la Clase',
         studentSupport: 'Soporte al Estudiante',
         noModulesAvailable: 'Ningún módulo disponible aún',
+        unlockMessage: 'Para desbloquear realice la compra del producto',
         allRightsReserved: 'Todos los derechos reservados'
       }
     };
@@ -812,7 +814,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                     </div>
                     <p className="text-amber-500 font-black text-[9px] md:text-[10px] uppercase tracking-[0.4em] mb-1 md:mb-4 italic">{t('exclusiveOffer')}</p>
                     <h2 className="text-xl md:text-4xl lg:text-6xl font-black mb-2 md:mb-6 uppercase italic tracking-tighter leading-tight px-2">{upsell.title}</h2>
-                    <p className="text-white/60 max-w-2xl mb-4 md:mb-10 text-[11px] md:text-sm lg:text-base line-clamp-2 px-4">{upsell.description}</p>
+                    <p className="text-white/60 max-w-2xl mb-4 md:mb-10 text-[11px] md:text-sm lg:text-base line-clamp-2 px-4">{t('unlockMessage')}</p>
                     <button 
                       onClick={() => window.open(upsell.upsellUrl, '_blank')}
                       className="px-6 md:px-12 py-3 md:py-5 bg-amber-500 text-black font-black rounded-lg md:rounded-xl flex items-center gap-2 md:gap-4 hover:bg-white transition-all shadow-2xl text-[9px] md:text-xs tracking-widest italic uppercase"
