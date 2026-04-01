@@ -799,8 +799,8 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         
         if (locked) {
           return (
-            <section key={upsell.id} className="px-4 md:px-12 py-8 md:py-20 border-t border-white/5">
-               <div className="relative w-full h-[280px] md:h-[400px] rounded-2xl md:rounded-3xl overflow-hidden group border border-white/5 hover:border-amber-500/30 transition-all">
+            <section key={upsell.id} className="px-4 md:px-12 py-8 md:py-12 border-t border-white/5">
+               <div className="relative w-full h-[280px] md:h-[320px] rounded-2xl md:rounded-3xl overflow-hidden group border border-white/5 hover:border-amber-500/30 transition-all">
                   <img 
                     src={upsell.bannerUrl || upsell.thumbnailUrl} 
                     className="w-full h-full object-cover grayscale blur-[2px] group-hover:grayscale-0 group-hover:blur-0 transition-all duration-700" 
@@ -809,17 +809,17 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                   />
                   <div className="absolute inset-0 bg-black/70 md:bg-black/60 backdrop-blur-sm group-hover:bg-black/40 transition-all" />
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-4 md:p-12 text-center">
-                    <div className="w-10 h-10 md:w-20 md:h-20 bg-amber-500 rounded-full flex items-center justify-center mb-3 md:mb-6 shadow-2xl shadow-amber-500/20">
-                      <Lock className="text-black" size={20} md:size={24} />
+                    <div className="w-10 h-10 md:w-16 md:h-16 bg-amber-500 rounded-full flex items-center justify-center mb-3 md:mb-4 shadow-2xl shadow-amber-500/20">
+                      <Lock className="text-black" size={20} />
                     </div>
-                    <p className="text-amber-500 font-black text-[9px] md:text-[10px] uppercase tracking-[0.4em] mb-1 md:mb-4 italic">{t('exclusiveOffer')}</p>
-                    <h2 className="text-xl md:text-4xl lg:text-6xl font-black mb-2 md:mb-6 uppercase italic tracking-tighter leading-tight px-2">{upsell.title}</h2>
-                    <p className="text-white/60 max-w-2xl mb-4 md:mb-10 text-[11px] md:text-sm lg:text-base line-clamp-2 px-4">{t('unlockMessage')}</p>
+                    <p className="text-amber-500 font-black text-[9px] md:text-[10px] uppercase tracking-[0.4em] mb-1 md:mb-2 italic">{t('exclusiveOffer')}</p>
+                    <h2 className="text-xl md:text-3xl lg:text-4xl font-black mb-2 md:mb-4 uppercase italic tracking-tighter leading-tight px-2">{upsell.title}</h2>
+                    <p className="text-white/60 max-w-2xl mb-4 md:mb-6 text-[11px] md:text-sm lg:text-base line-clamp-2 px-4">{t('unlockMessage')}</p>
                     <button 
                       onClick={() => window.open(upsell.upsellUrl, '_blank')}
-                      className="px-6 md:px-12 py-3 md:py-5 bg-amber-500 text-black font-black rounded-lg md:rounded-xl flex items-center gap-2 md:gap-4 hover:bg-white transition-all shadow-2xl text-[9px] md:text-xs tracking-widest italic uppercase"
+                      className="px-6 md:px-12 py-3 md:py-4 bg-amber-500 text-black font-black rounded-lg md:rounded-xl flex items-center gap-2 md:gap-4 hover:bg-white transition-all shadow-2xl text-[9px] md:text-xs tracking-widest italic uppercase"
                     >
-                      <ShoppingCart size={14} md:size={18} /> {t('getAccessNow')}
+                      <ShoppingCart size={14} /> {t('getAccessNow')}
                     </button>
                   </div>
                </div>
