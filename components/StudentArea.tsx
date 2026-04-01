@@ -411,7 +411,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                   <div className="flex-1">
                     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-8 border-b border-white/5 pb-8">
                       <div>
-                        <h1 className="text-lg md:text-4xl font-black mb-4 uppercase italic tracking-tighter text-white leading-tight">
+                        <h1 className="text-xl md:text-4xl font-black mb-4 uppercase italic tracking-tighter text-white leading-tight">
                           {selectedLesson.title}
                         </h1>
                         <div className="flex items-center gap-6">
@@ -435,7 +435,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
 
                     {/* LESSON DESCRIPTION */}
                     <div className="mb-12 bg-white/[0.02] border border-white/5 rounded-3xl p-6 md:p-10 shadow-inner">
-                      <h3 className="text-base md:text-3xl font-black mb-8 uppercase italic tracking-tighter flex items-center gap-4 text-white">
+                      <h3 className="text-sm md:text-3xl font-black mb-8 uppercase italic tracking-tighter flex items-center gap-4 text-white">
                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
                           <List size={24} className="text-black" />
                         </div>
@@ -595,7 +595,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                   </div>
                 </div>
                 <div className="p-4 md:p-6">
-                  <h3 className="font-black text-xs md:text-lg uppercase italic tracking-tighter group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight">{lesson.title}</h3>
+                  <h3 className="font-black text-sm md:text-lg uppercase italic tracking-tighter group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight">{lesson.title}</h3>
                   <p className="text-white/40 text-[10px] md:text-xs mt-2 line-clamp-2 leading-relaxed">{lesson.description.replace(/<[^>]*>?/gm, '')}</p>
                 </div>
               </div>
@@ -811,7 +811,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                       <Lock className="text-black" size={20} md:size={24} />
                     </div>
                     <p className="text-amber-500 font-black text-[9px] md:text-[10px] uppercase tracking-[0.4em] mb-1 md:mb-4 italic">{t('exclusiveOffer')}</p>
-                    <h2 className="text-2xl md:text-4xl lg:text-6xl font-black mb-2 md:mb-6 uppercase italic tracking-tighter leading-tight px-2">{upsell.title}</h2>
+                    <h2 className="text-xl md:text-4xl lg:text-6xl font-black mb-2 md:mb-6 uppercase italic tracking-tighter leading-tight px-2">{upsell.title}</h2>
                     <p className="text-white/60 max-w-2xl mb-4 md:mb-10 text-[11px] md:text-sm lg:text-base line-clamp-2 px-4">{upsell.description}</p>
                     <button 
                       onClick={() => window.open(upsell.upsellUrl, '_blank')}
@@ -894,15 +894,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
           <div className="flex flex-col items-center lg:items-start gap-4">
             <img src={course.logoUrl} className="w-12 h-12 rounded-xl grayscale opacity-30 shadow-2xl border border-white/5" alt="Logo grayscale" />
-            <p className="text-white/20 text-[10px] uppercase font-black tracking-[0.2em]">© 2025 {course.name} • {t('allRightsReserved')}</p>
-          </div>
-          <div className="flex items-center gap-10">
-            <a href={course.supportUrl} className="flex items-center gap-3 text-white/40 hover:text-amber-500 transition-all group">
-              <div className="w-10 h-10 rounded-full border border-white/5 flex items-center justify-center group-hover:border-amber-500/50">
-                <Headphones size={20} />
-              </div>
-              <span className="text-xs font-black uppercase tracking-widest">{t('studentSupport')}</span>
-            </a>
+            <p className="text-white/20 text-[10px] uppercase font-black tracking-[0.2em]">© 2026 {course.name} • {t('allRightsReserved')}</p>
           </div>
         </div>
       </footer>
