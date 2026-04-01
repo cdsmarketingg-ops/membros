@@ -1584,7 +1584,7 @@ onChange={(e) => setFormData({
               <div className="space-y-6 pt-10 border-t border-white/5">
                 <h3 className="text-xl font-bold border-l-4 border-amber-500 pl-4 text-white uppercase tracking-tight italic">Capa Mobile (Banner Mobile)</h3>
                 <div className="space-y-4">
-                  <div className="w-full max-w-[300px] aspect-[9/16] rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl relative group mx-auto md:mx-0">
+                  <div className="w-full max-w-[500px] aspect-video rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl relative group mx-auto md:mx-0">
                     <img src={formData.mobileBannerUrl || formData.bannerUrl} className="w-full h-full object-cover" alt="Mobile Banner preview" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 p-4">
                       <button 
