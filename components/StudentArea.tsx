@@ -800,43 +800,29 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         if (locked) {
           return (
             <section key={upsell.id} className="px-4 md:px-12 py-8 md:py-20 border-t border-white/5">
-              <div className="relative w-full min-h-[400px] md:h-[500px] rounded-2xl md:rounded-3xl overflow-hidden group border border-white/5 hover:border-amber-500/30 transition-all flex flex-col md:flex-row bg-[#111]">
-                {/* Image Section */}
-                <div className="relative w-full md:w-[45%] h-[250px] md:h-full overflow-hidden">
+               <div className="relative w-full h-[280px] md:h-[400px] rounded-2xl md:rounded-3xl overflow-hidden group border border-white/5 hover:border-amber-500/30 transition-all">
                   <img 
                     src={upsell.bannerUrl || upsell.thumbnailUrl} 
-                    className="w-full h-full object-cover grayscale blur-[1px] group-hover:grayscale-0 group-hover:blur-0 transition-all duration-700" 
+                    className="w-full h-full object-cover grayscale blur-[2px] group-hover:grayscale-0 group-hover:blur-0 transition-all duration-700" 
                     alt={upsell.title} 
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 to-transparent" />
-                </div>
-
-                {/* Content Section */}
-                <div className="relative flex-1 flex flex-col items-center md:items-start justify-center p-8 md:p-16 text-center md:text-left">
-                  <div className="w-12 h-12 md:w-16 md:h-16 bg-amber-500 rounded-2xl flex items-center justify-center mb-6 shadow-2xl shadow-amber-500/20 transform -rotate-3 group-hover:rotate-0 transition-transform">
-                    <Lock className="text-black" size={24} />
+                  <div className="absolute inset-0 bg-black/70 md:bg-black/60 backdrop-blur-sm group-hover:bg-black/40 transition-all" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-4 md:p-12 text-center">
+                    <div className="w-10 h-10 md:w-20 md:h-20 bg-amber-500 rounded-full flex items-center justify-center mb-3 md:mb-6 shadow-2xl shadow-amber-500/20">
+                      <Lock className="text-black" size={20} md:size={24} />
+                    </div>
+                    <p className="text-amber-500 font-black text-[9px] md:text-[10px] uppercase tracking-[0.4em] mb-1 md:mb-4 italic">{t('exclusiveOffer')}</p>
+                    <h2 className="text-xl md:text-4xl lg:text-6xl font-black mb-2 md:mb-6 uppercase italic tracking-tighter leading-tight px-2">{upsell.title}</h2>
+                    <p className="text-white/60 max-w-2xl mb-4 md:mb-10 text-[11px] md:text-sm lg:text-base line-clamp-2 px-4">{t('unlockMessage')}</p>
+                    <button 
+                      onClick={() => window.open(upsell.upsellUrl, '_blank')}
+                      className="px-6 md:px-12 py-3 md:py-5 bg-amber-500 text-black font-black rounded-lg md:rounded-xl flex items-center gap-2 md:gap-4 hover:bg-white transition-all shadow-2xl text-[9px] md:text-xs tracking-widest italic uppercase"
+                    >
+                      <ShoppingCart size={14} md:size={18} /> {t('getAccessNow')}
+                    </button>
                   </div>
-                  
-                  <p className="text-amber-500 font-black text-[10px] md:text-xs uppercase tracking-[0.4em] mb-2 md:mb-4 italic">{t('exclusiveOffer')}</p>
-                  
-                  <h2 className="text-2xl md:text-5xl lg:text-6xl font-black mb-4 md:mb-6 uppercase italic tracking-tighter leading-tight">
-                    {upsell.title}
-                  </h2>
-                  
-                  <p className="text-white/60 max-w-xl mb-8 md:mb-12 text-sm md:text-lg leading-relaxed">
-                    {t('unlockMessage')}
-                  </p>
-                  
-                  <button 
-                    onClick={() => window.open(upsell.upsellUrl, '_blank')}
-                    className="w-full md:w-auto px-10 md:px-16 py-4 md:py-6 bg-amber-500 text-black font-black rounded-xl flex items-center justify-center gap-4 hover:bg-white transition-all shadow-2xl text-xs md:text-sm tracking-widest italic uppercase group/btn"
-                  >
-                    <ShoppingCart size={20} className="group-hover/btn:scale-110 transition-transform" /> 
-                    {t('getAccessNow')}
-                  </button>
-                </div>
-              </div>
+               </div>
             </section>
           );
         }
