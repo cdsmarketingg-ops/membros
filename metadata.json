@@ -1,6 +1,6 @@
 {
-  "name": "Nexus LMS - Premium Member Area",
-  "description": "A high-end membership platform inspired by Kiwify and Hotmart, featuring a full admin dashboard for complete customization of modules, lessons, and branding.",
+  "name": "Aevo Pro 2.0",
+  "description": "A high-end membership platform for premium learning experiences.",
   "requestFramePermissions": [
     "camera",
     "microphone"

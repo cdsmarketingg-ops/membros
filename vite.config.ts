@@ -16,8 +16,8 @@ export default defineConfig(({ mode }) => {
           registerType: 'autoUpdate',
           includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
           manifest: {
-            name: 'Nexus LMS - Premium Member Area',
-            short_name: 'Nexus LMS',
+            name: 'Aevo Pro 2.0',
+            short_name: 'Aevo Pro',
             description: 'A premium learning experience platform.',
             theme_color: '#0a0a0a',
             background_color: '#0a0a0a',
@@ -27,19 +27,19 @@ export default defineConfig(({ mode }) => {
             start_url: '/',
             icons: [
               {
-                src: 'https://cdn-icons-png.flaticon.com/512/3135/3135673.png',
+                src: 'https://eliabcamposteclas.com/wp-content/uploads/2026/04/ChatGPT-Image-23-de-mar.-de-2026-22_05_32.jpg',
                 sizes: '192x192',
-                type: 'image/png'
+                type: 'image/jpeg'
               },
               {
-                src: 'https://cdn-icons-png.flaticon.com/512/3135/3135673.png',
+                src: 'https://eliabcamposteclas.com/wp-content/uploads/2026/04/ChatGPT-Image-23-de-mar.-de-2026-22_05_32.jpg',
                 sizes: '512x512',
-                type: 'image/png'
+                type: 'image/jpeg'
               },
               {
-                src: 'https://cdn-icons-png.flaticon.com/512/3135/3135673.png',
+                src: 'https://eliabcamposteclas.com/wp-content/uploads/2026/04/ChatGPT-Image-23-de-mar.-de-2026-22_05_32.jpg',
                 sizes: '512x512',
-                type: 'image/png',
+                type: 'image/jpeg',
                 purpose: 'any maskable'
               }
             ]

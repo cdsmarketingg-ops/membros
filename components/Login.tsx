@@ -111,7 +111,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         </div>
         
         <p className="text-center mt-6 text-white/20 text-xs uppercase tracking-[0.2em]">
-          Nexus LMS &copy; 2026
+          Aevo Pro 2.0 &copy; 2026
         </p>
       </div>
     </div>
