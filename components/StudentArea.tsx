@@ -72,7 +72,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         resumeCourse: 'RETOMAR CURSO',
         selectLessonToStart: 'Selecione uma aula para começar',
         premiumSupport: 'SUPORTE PREMIUM',
-        lessonDescription: 'Descrição da Aula',
+        lessonDescription: 'Conteúdo da Aula',
         lessonMaterials: 'Materiais da Aula',
         studentSupport: 'Suporte ao Aluno',
         noModulesAvailable: 'Nenhum módulo disponível ainda',
@@ -125,7 +125,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         resumeCourse: 'REANUDAR CURSO',
         selectLessonToStart: 'Selecciona una clase para comenzar',
         premiumSupport: 'SOPORTE PREMIUM',
-        lessonDescription: 'Descripción de la Clase',
+        lessonDescription: 'Contenido de la Clase',
         lessonMaterials: 'Materiales de la Clase',
         studentSupport: 'Soporte al Estudiante',
         noModulesAvailable: 'Ningún módulo disponible aún',
@@ -435,7 +435,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
 
                     {/* LESSON DESCRIPTION */}
                     <div className="mb-12 bg-white/[0.02] border border-white/5 rounded-3xl p-6 md:p-10 shadow-inner">
-                      <h3 className="text-xl md:text-3xl font-black mb-8 uppercase italic tracking-tighter flex items-center gap-4 text-white">
+                      <h3 className="text-lg md:text-3xl font-black mb-8 uppercase italic tracking-tighter flex items-center gap-4 text-white">
                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
                           <List size={24} className="text-black" />
                         </div>
