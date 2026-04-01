@@ -607,7 +607,6 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                 </div>
                 <div className="p-4 md:p-6">
                   <h3 className="font-black text-sm md:text-lg uppercase italic tracking-tighter group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight">{lesson.title}</h3>
-                  <p className="text-white/40 text-[10px] md:text-xs mt-2 line-clamp-2 leading-relaxed">{lesson.description.replace(/<[^>]*>?/gm, '')}</p>
                 </div>
               </div>
             ))}
