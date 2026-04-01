@@ -260,7 +260,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
 
   if (viewState === 'player') {
     return (
-      <div className="flex h-full overflow-hidden bg-[#0a0a0a] relative">
+      <div className="flex h-full overflow-hidden bg-[#0a0a0a] relative touch-pan-y">
         {/* MOBILE PLAYER HEADER (Visible on small screens) */}
         <div className="lg:hidden fixed top-14 left-0 right-0 h-14 bg-[#111] border-b border-white/5 flex items-center justify-between px-4 z-[80]">
           <button 
@@ -351,7 +351,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         )}
 
         {/* PLAYER CONTENT AREA */}
-        <main className="flex-1 overflow-y-auto custom-scrollbar pb-20 pt-14 lg:pt-0">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar pb-20 pt-14 lg:pt-0 touch-pan-y">
           <div className="max-w-5xl mx-auto p-4 lg:p-10">
             {selectedLesson ? (
               <>
@@ -435,7 +435,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
 
                     {/* LESSON DESCRIPTION */}
                     <div className="mb-12 bg-white/[0.02] border border-white/5 rounded-3xl p-6 md:p-10 shadow-inner">
-                      <h3 className="text-lg md:text-3xl font-black mb-8 uppercase italic tracking-tighter flex items-center gap-4 text-white">
+                      <h3 className="text-base md:text-3xl font-black mb-8 uppercase italic tracking-tighter flex items-center gap-4 text-white">
                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
                           <List size={24} className="text-black" />
                         </div>
@@ -485,7 +485,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
 
   if (viewState === 'module-lessons') {
     return (
-      <div className="h-full overflow-y-auto custom-scrollbar bg-[#0a0a0a]">
+      <div className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-[#0a0a0a] touch-pan-y">
         {/* STUDENT HEADER */}
         <nav className="h-16 flex items-center justify-between px-8 bg-black/50 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50">
           <div className="flex items-center gap-10">
@@ -607,7 +607,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
   }
 
   return (
-    <div className="h-full overflow-y-auto custom-scrollbar bg-[#0a0a0a]">
+    <div className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-[#0a0a0a] touch-pan-y">
       {/* STUDENT HEADER */}
       <nav className="h-16 flex items-center justify-between px-4 md:px-8 bg-black/50 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50">
         <div className="flex items-center gap-4 md:gap-10">
