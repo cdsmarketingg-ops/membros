@@ -761,11 +761,16 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
       {/* STUDENT BANNER */}
       {(homeFilter === 'all' || !isCourseLocked(course)) && (
         <div className="relative w-full h-[350px] md:h-[500px] overflow-hidden group">
-          <img 
-            src={course.bannerUrl} 
-            className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[2000ms]" 
-            alt="Banner"
-          />
+          <picture className="w-full h-full">
+            {course.mobileBannerUrl && (
+              <source media="(max-width: 768px)" srcSet={course.mobileBannerUrl} />
+            )}
+            <img 
+              src={course.bannerUrl} 
+              className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[2000ms]" 
+              alt="Banner"
+            />
+          </picture>
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
           <div className="absolute bottom-8 md:bottom-12 left-6 md:left-12 max-w-2xl">
             <p className="text-amber-500 font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] mb-2 md:mb-4 italic">{t('restrictedAccess')}</p>

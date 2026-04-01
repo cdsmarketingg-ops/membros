@@ -53,6 +53,7 @@ export interface CourseConfig {
   name: string;
   description: string;
   bannerUrl: string;
+  mobileBannerUrl?: string;
   logoUrl: string;
   accentColor: string;
   supportUrl: string;

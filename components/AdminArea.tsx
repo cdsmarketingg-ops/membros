@@ -221,7 +221,7 @@ useEffect(() => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const currentUploadTarget = useRef<{ modId: string, lessonId: string, courseId?: string } | null>(null);
-  const currentImageTarget = useRef<{ type: 'logo' | 'banner' | 'module' | 'lesson' | 'upsell-thumb' | 'upsell-banner', modId?: string, lessonId?: string, courseId?: string } | null>(null);
+  const currentImageTarget = useRef<{ type: 'logo' | 'banner' | 'mobile-banner' | 'module' | 'lesson' | 'upsell-thumb' | 'upsell-banner', modId?: string, lessonId?: string, courseId?: string } | null>(null);
   const currentVideoTarget = useRef<{ modId: string, lessonId: string, courseId?: string } | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
@@ -1119,6 +1119,8 @@ useEffect(() => {
         setFormData(prev => ({ ...prev, logoUrl: imageUrl }));
       } else if (target.type === 'banner') {
         setFormData(prev => ({ ...prev, bannerUrl: imageUrl }));
+      } else if (target.type === 'mobile-banner') {
+        setFormData(prev => ({ ...prev, mobileBannerUrl: imageUrl }));
       } else if (target.type === 'module' && target.modId) {
         updateModule(target.modId, { thumbnailUrl: imageUrl }, target.courseId);
       } else if (target.type === 'lesson' && target.modId && target.lessonId) {
@@ -1573,6 +1575,51 @@ onChange={(e) => setFormData({
                       value={formData.bannerUrl} 
                       onChange={(e) => setFormData({...formData, bannerUrl: e.target.value})} 
                       placeholder="Ou cole a URL da Imagem aqui..." 
+                      className="flex-1 bg-black border border-white/10 rounded-lg px-5 py-4 text-white outline-none focus:border-amber-500 text-xs" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6 pt-10 border-t border-white/5">
+                <h3 className="text-xl font-bold border-l-4 border-amber-500 pl-4 text-white uppercase tracking-tight italic">Capa Mobile (Banner Mobile)</h3>
+                <div className="space-y-4">
+                  <div className="w-full max-w-[300px] aspect-[9/16] rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl relative group mx-auto md:mx-0">
+                    <img src={formData.mobileBannerUrl || formData.bannerUrl} className="w-full h-full object-cover" alt="Mobile Banner preview" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 p-4">
+                      <button 
+                        onClick={() => triggerImageUpload({ type: 'mobile-banner' })}
+                        className="w-full bg-white text-black px-4 py-2 rounded-xl font-black text-[10px] flex items-center justify-center gap-2 hover:bg-amber-500 transition-all shadow-2xl"
+                      >
+                        <Upload size={14} /> ALTERAR IMAGEM
+                      </button>
+                      {formData.mobileBannerUrl && (
+                        <button 
+                          onClick={async () => {
+                          const urlToDelete = formData.mobileBannerUrl;
+                          setConfirmDelete({
+                            title: 'Apagar Banner Mobile?',
+                            message: 'Deseja remover o banner mobile permanentemente?',
+                            onConfirm: () => {
+                              setFormData(prev => ({ ...prev, mobileBannerUrl: '' }));
+                              if (urlToDelete) deleteFromBunny(urlToDelete);
+                              setConfirmDelete(null);
+                            }
+                          });
+                        }}
+                          className="w-full bg-red-500 text-white px-4 py-2 rounded-xl font-black text-[10px] flex items-center justify-center gap-2 hover:bg-red-600 transition-all shadow-2xl"
+                        >
+                          <Trash2 size={14} /> APAGAR
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <input 
+                      type="text" 
+                      value={formData.mobileBannerUrl || ''} 
+                      onChange={(e) => setFormData({...formData, mobileBannerUrl: e.target.value})} 
+                      placeholder="URL da Imagem Mobile..." 
                       className="flex-1 bg-black border border-white/10 rounded-lg px-5 py-4 text-white outline-none focus:border-amber-500 text-xs" 
                     />
                   </div>
