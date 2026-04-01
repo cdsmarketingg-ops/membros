@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { CourseConfig, Lesson, Module, StudentView } from '../types';
-import { Play, Search, Bell, Menu, Headphones, ChevronRight, ChevronLeft, Download, Tag, Calendar, Layout, X, List, Lock, ShoppingCart, User, MessageCircle, FileText, ExternalLink } from 'lucide-react';
+import { Play, Search, Bell, Menu, Headphones, Download, Tag, Calendar, Layout, X, List, Lock, ShoppingCart, User, MessageCircle, FileText, ExternalLink } from 'lucide-react';
 
 interface StudentAreaProps {
   course: CourseConfig;
@@ -270,7 +270,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
             onClick={() => setViewState('home')}
             className="flex items-center gap-2 text-xs font-bold text-white/60 uppercase tracking-widest"
           >
-            <ChevronLeft size={18} /> {t('home')}
+            {t('home')}
           </button>
           <div className="flex-1 px-4 truncate text-center">
              <span className="text-[10px] font-black uppercase text-amber-500 truncate block">{t('currentLesson')}</span>
@@ -297,7 +297,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                 onClick={() => setViewState('home')}
                 className="text-xs font-bold text-white/40 hover:text-white uppercase tracking-widest flex items-center gap-2 mb-4"
               >
-                <ChevronLeft size={14} /> {t('backToHome')}
+                {t('backToHome')}
               </button>
               <h2 className="font-bold text-lg leading-tight uppercase italic">
                 {activeCourseId === 'main' 
@@ -497,7 +497,6 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
                 onClick={() => setViewState('home')}
                 className="text-white/60 hover:text-white transition-colors flex items-center gap-2 mr-4"
               >
-                <ChevronLeft size={20} />
                 <span className="text-[10px] font-black uppercase tracking-widest hidden md:block">{t('back')}</span>
               </button>
               <img src={course.logoUrl} className="w-8 h-8 rounded-lg shadow-lg border border-white/10 object-contain bg-white/5 p-1" alt="Logo" />

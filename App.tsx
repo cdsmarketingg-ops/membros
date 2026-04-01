@@ -4,7 +4,7 @@ import { INITIAL_COURSE_DATA } from './constants';
 import StudentArea from './components/StudentArea';
 import AdminArea from './components/AdminArea';
 import Login from './components/Login';
-import { ChevronLeft, User, Bell, Search, Settings, LogOut, Loader2 } from 'lucide-react';
+import { User, Bell, Search, Settings, LogOut, Loader2 } from 'lucide-react';
 
 // 🔥 Sessão expira em 7 dias (igual ao cookie)
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000;
@@ -158,7 +158,6 @@ const App: React.FC = () => {
             onClick={() => setView('student')}
             className="text-white/60 hover:text-white flex items-center gap-1 md:gap-2 text-xs md:text-sm transition-colors"
           >
-            <ChevronLeft size={18} />
             <span className="hidden xs:inline">Configurações</span>
           </button>
         </div>
