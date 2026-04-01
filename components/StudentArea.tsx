@@ -17,6 +17,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
   const [activeCourseId, setActiveCourseId] = useState<string>('main');
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [homeFilter, setHomeFilter] = useState<'all' | 'my-courses'>('all');
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const lang = activeCourseId === 'main' 
@@ -619,9 +620,24 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
             <span className="font-black text-lg tracking-tighter hidden md:block uppercase italic">{course.name}</span>
           </div>
           <div className="hidden lg:flex items-center gap-8 text-[10px] font-black uppercase tracking-widest text-white/60">
-            <a href="#" className="text-white border-b-2 border-amber-500 py-5">{t('showcase')}</a>
-            <a href="#" className="hover:text-white transition-colors">{t('myTrainings')}</a>
-            <a href="#" className="hover:text-white transition-colors">{t('community')}</a>
+            <button 
+              onClick={() => {
+                setHomeFilter('all');
+                setViewState('home');
+              }}
+              className={`py-5 transition-all border-b-2 ${homeFilter === 'all' && viewState === 'home' ? 'text-white border-amber-500' : 'border-transparent hover:text-white'}`}
+            >
+              {t('showcase')}
+            </button>
+            <button 
+              onClick={() => {
+                setHomeFilter('my-courses');
+                setViewState('home');
+              }}
+              className={`py-5 transition-all border-b-2 ${homeFilter === 'my-courses' && viewState === 'home' ? 'text-white border-amber-500' : 'border-transparent hover:text-white'}`}
+            >
+              {t('myTrainings')}
+            </button>
           </div>
         </div>
         <div className="flex items-center gap-3 md:gap-6 relative">
@@ -693,15 +709,26 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         <div className="flex-1 p-6 space-y-6">
           <div className="space-y-2">
             <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-4">Navegação</p>
-            <a href="#" className="flex items-center gap-3 text-sm font-bold text-amber-500 bg-white/5 p-3 rounded-xl">
+            <button 
+              onClick={() => {
+                setHomeFilter('all');
+                setViewState('home');
+                setIsMobileSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 text-sm font-bold p-3 rounded-xl transition-all ${homeFilter === 'all' && viewState === 'home' ? 'text-amber-500 bg-white/5' : 'text-white/60 hover:bg-white/5'}`}
+            >
               <Layout size={18} /> {t('showcase')}
-            </a>
-            <a href="#" className="flex items-center gap-3 text-sm font-bold text-white/60 p-3 rounded-xl hover:bg-white/5 transition-colors">
+            </button>
+            <button 
+              onClick={() => {
+                setHomeFilter('my-courses');
+                setViewState('home');
+                setIsMobileSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 text-sm font-bold p-3 rounded-xl transition-all ${homeFilter === 'my-courses' && viewState === 'home' ? 'text-amber-500 bg-white/5' : 'text-white/60 hover:bg-white/5'}`}
+            >
               <Play size={18} /> {t('myTrainings')}
-            </a>
-            <a href="#" className="flex items-center gap-3 text-sm font-bold text-white/60 p-3 rounded-xl hover:bg-white/5 transition-colors">
-              <MessageCircle size={18} /> {t('community')}
-            </a>
+            </button>
           </div>
         </div>
       </aside>
@@ -715,86 +742,92 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
       )}
 
       {/* STUDENT BANNER */}
-      <div className="relative w-full h-[350px] md:h-[500px] overflow-hidden group">
-        <img 
-          src={course.bannerUrl} 
-          className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[2000ms]" 
-          alt="Banner"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
-        <div className="absolute bottom-8 md:bottom-12 left-6 md:left-12 max-w-2xl">
-          <p className="text-amber-500 font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] mb-2 md:mb-4 italic">{t('restrictedAccess')}</p>
-          <h1 className="text-3xl md:text-5xl lg:text-8xl font-black mb-4 md:mb-8 drop-shadow-2xl uppercase italic tracking-tighter leading-tight md:leading-none">{course.name}</h1>
-          <button 
-            onClick={() => enterModule(course.modules[0])}
-            className="px-8 md:px-12 py-4 md:py-5 bg-white text-black font-black rounded-xl flex items-center gap-3 md:gap-4 hover:bg-amber-500 transition-all shadow-2xl scale-100 hover:scale-105 active:scale-95 text-[10px] md:text-xs tracking-widest italic uppercase"
-          >
-            <Play fill="black" size={18} /> {t('resumeTraining')}
-          </button>
+      {(homeFilter === 'all' || !isCourseLocked(course)) && (
+        <div className="relative w-full h-[350px] md:h-[500px] overflow-hidden group">
+          <img 
+            src={course.bannerUrl} 
+            className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[2000ms]" 
+            alt="Banner"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
+          <div className="absolute bottom-8 md:bottom-12 left-6 md:left-12 max-w-2xl">
+            <p className="text-amber-500 font-black text-[8px] md:text-[10px] uppercase tracking-[0.4em] mb-2 md:mb-4 italic">{t('restrictedAccess')}</p>
+            <h1 className="text-3xl md:text-5xl lg:text-8xl font-black mb-4 md:mb-8 drop-shadow-2xl uppercase italic tracking-tighter leading-tight md:leading-none">{course.name}</h1>
+            <button 
+              onClick={() => enterModule(course.modules[0])}
+              className="px-8 md:px-12 py-4 md:py-5 bg-white text-black font-black rounded-xl flex items-center gap-3 md:gap-4 hover:bg-amber-500 transition-all shadow-2xl scale-100 hover:scale-105 active:scale-95 text-[10px] md:text-xs tracking-widest italic uppercase"
+            >
+              <Play fill="black" size={18} /> {t('resumeTraining')}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* MODULES GRID */}
-      <section className="px-4 md:px-12 py-10 md:py-20">
-        <div className="flex items-center justify-between mb-8 md:mb-16">
-          <h2 className="text-xl md:text-3xl font-black uppercase italic tracking-tight flex items-center gap-2 md:gap-4">
-            {t('courseModules')} <span className="text-white/10 font-light text-xs md:text-sm not-italic">({course.modules.length})</span>
-          </h2>
-          <div className="h-[1px] flex-1 mx-4 md:mx-12 bg-white/5" />
-        </div>
+      {(homeFilter === 'all' || !isCourseLocked(course)) && (
+        <section className="px-4 md:px-12 py-10 md:py-20">
+          <div className="flex items-center justify-between mb-8 md:mb-16">
+            <h2 className="text-xl md:text-3xl font-black uppercase italic tracking-tight flex items-center gap-2 md:gap-4">
+              {t('courseModules')} <span className="text-white/10 font-light text-xs md:text-sm not-italic">({course.modules.length})</span>
+            </h2>
+            <div className="h-[1px] flex-1 mx-4 md:mx-12 bg-white/5" />
+          </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-10">
-          {course.modules.map((mod) => {
-            const locked = isModuleLocked(mod);
-            return (
-              <div 
-                key={mod.id} 
-                className={`group cursor-pointer relative ${locked ? 'opacity-80' : ''}`}
-                onClick={() => enterModule(mod, 'main')}
-              >
-                <div className={`relative overflow-hidden rounded-2xl ring-1 ring-white/5 group-hover:ring-amber-500/40 transition-all shadow-2xl shadow-black duration-500 ${
-                  course.moduleThumbnailOrientation === 'horizontal' ? 'aspect-video' : 'aspect-[2/3]'
-                }`}>
-                  <img 
-                    src={mod.thumbnailUrl} 
-                    className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1000ms] ${locked ? 'grayscale blur-[2px]' : ''}`} 
-                    alt={mod.title}
-                  />
-                  
-                  {/* CONDITIONAL TEXT OVERLAY */}
-                  {!mod.hideTitle && (
-                    <>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
-                      <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6">
-                        <h3 className="font-black text-sm lg:text-xl leading-tight drop-shadow-2xl text-white group-hover:text-amber-500 transition-colors uppercase italic tracking-tighter">{mod.title}</h3>
-                        <div className="flex items-center justify-between mt-2 md:mt-3">
-                          <span className="text-[9px] md:text-[10px] text-white/40 font-black uppercase tracking-widest">{mod.lessons.length} {t('lessonsCount')}</span>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-10">
+            {course.modules.map((mod) => {
+              const locked = isModuleLocked(mod);
+              return (
+                <div 
+                  key={mod.id} 
+                  className={`group cursor-pointer relative ${locked ? 'opacity-80' : ''}`}
+                  onClick={() => enterModule(mod, 'main')}
+                >
+                  <div className={`relative overflow-hidden rounded-2xl ring-1 ring-white/5 group-hover:ring-amber-500/40 transition-all shadow-2xl shadow-black duration-500 ${
+                    course.moduleThumbnailOrientation === 'horizontal' ? 'aspect-video' : 'aspect-[2/3]'
+                  }`}>
+                    <img 
+                      src={mod.thumbnailUrl} 
+                      className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1000ms] ${locked ? 'grayscale blur-[2px]' : ''}`} 
+                      alt={mod.title}
+                    />
+                    
+                    {/* CONDITIONAL TEXT OVERLAY */}
+                    {!mod.hideTitle && (
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6">
+                          <h3 className="font-black text-sm lg:text-xl leading-tight drop-shadow-2xl text-white group-hover:text-amber-500 transition-colors uppercase italic tracking-tighter">{mod.title}</h3>
+                          <div className="flex items-center justify-between mt-2 md:mt-3">
+                            <span className="text-[9px] md:text-[10px] text-white/40 font-black uppercase tracking-widest">{mod.lessons.length} {t('lessonsCount')}</span>
+                          </div>
                         </div>
-                      </div>
-                    </>
-                  )}
-                  
-                  {/* PLAY ICON OVERLAY */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-75 group-hover:scale-100">
-                    {locked ? (
-                      <div className="w-16 h-16 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-2xl ring-4 ring-white/20">
-                        <Lock size={28} />
-                      </div>
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-2xl ring-4 ring-white/20">
-                        <Play fill="black" size={28} className="ml-1" />
-                      </div>
+                      </>
                     )}
+                    
+                    {/* PLAY ICON OVERLAY */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-75 group-hover:scale-100">
+                      {locked ? (
+                        <div className="w-16 h-16 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-2xl ring-4 ring-white/20">
+                          <Lock size={28} />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-2xl ring-4 ring-white/20">
+                          <Play fill="black" size={28} className="ml-1" />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* UPSELL COURSES SECTIONS */}
-      {(course.upsellCourses || []).map((upsell) => {
+      {(course.upsellCourses || [])
+        .filter(upsell => homeFilter === 'all' || !isCourseLocked(upsell))
+        .map((upsell) => {
         const locked = isCourseLocked(upsell);
         
         if (locked) {
