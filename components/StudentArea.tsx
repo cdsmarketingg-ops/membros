@@ -268,9 +268,9 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
         <div className="lg:hidden fixed top-14 left-0 right-0 h-14 bg-[#111] border-b border-white/5 flex items-center justify-between px-4 z-[80]">
           <button 
             onClick={() => setViewState('home')}
-            className="flex items-center gap-2 text-xs font-bold text-white/60 uppercase tracking-widest"
+            className="flex items-center gap-2 text-xs font-bold text-amber-500 uppercase tracking-widest"
           >
-            {t('home')}
+            {t('back')}
           </button>
           <div className="flex-1 px-4 truncate text-center">
              <span className="text-[10px] font-black uppercase text-amber-500 truncate block">{t('currentLesson')}</span>
@@ -490,14 +490,14 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
     return (
       <div className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-[#0a0a0a] touch-pan-y">
         {/* STUDENT HEADER */}
-        <nav className="h-16 flex items-center justify-between px-8 bg-black/50 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50">
+        <nav className="h-16 flex items-center justify-between px-4 md:px-8 bg-black/50 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50">
           <div className="flex items-center gap-10">
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setViewState('home')}
-                className="text-white/60 hover:text-white transition-colors flex items-center gap-2 mr-4"
+                className="text-amber-500 hover:text-amber-400 transition-colors flex items-center gap-2 mr-4"
               >
-                <span className="text-[10px] font-black uppercase tracking-widest hidden md:block">{t('back')}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">{t('back')}</span>
               </button>
               <img src={course.logoUrl} className="w-8 h-8 rounded-lg shadow-lg border border-white/10 object-contain bg-white/5 p-1" alt="Logo" />
               <span className="font-black text-lg tracking-tighter hidden md:block uppercase italic">{course.name}</span>
