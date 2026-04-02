@@ -6,9 +6,10 @@ import { Play, Search, Bell, Menu, Headphones, Download, Tag, Calendar, Layout, 
 interface StudentAreaProps {
   course: CourseConfig;
   userProducts: string[];
+  isAdmin?: boolean;
 }
 
-const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
+const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts, isAdmin }) => {
   const [viewState, setViewState] = useState<StudentView>('home');
   const [selectedModule, setSelectedModule] = useState<Module>(course.modules[0]);
   const [selectedLesson, setSelectedLesson] = useState<Lesson>(course.modules[0]?.lessons[0]);
@@ -221,12 +222,14 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts }) => {
   };
 
   const isModuleLocked = (mod: Module) => {
+    if (isAdmin) return false;
     if (!mod.isUpsell) return false;
     if (!mod.productId) return false;
     return !userProducts.includes(mod.productId);
   };
 
   const isCourseLocked = (upsell: any) => {
+    if (isAdmin) return false;
     if (!upsell.productId) return false;
     return !userProducts.includes(upsell.productId);
   };

@@ -193,7 +193,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 mt-14 overflow-hidden">
         {currentView === 'student' ? (
-          <StudentArea course={courseData} userProducts={userProducts} />
+          <StudentArea course={courseData} userProducts={userProducts} isAdmin={isAdmin} />
         ) : (
           <AdminArea course={courseData} onUpdate={handleUpdateCourse} />
         )}
