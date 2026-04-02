@@ -588,7 +588,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts, isAdmin
               <div 
                 key={lesson.id}
                 onClick={() => selectLesson(selectedModule!, lesson, activeCourseId)}
-                className="group cursor-pointer bg-white/5 rounded-2xl overflow-hidden border border-white/5 hover:border-amber-500/50 transition-all shadow-2xl flex-shrink-0 w-[280px] md:w-auto snap-start"
+                className="group cursor-pointer bg-white/5 rounded-2xl overflow-hidden border border-white/5 hover:border-amber-500/50 transition-all shadow-2xl flex-shrink-0 w-[180px] md:w-auto snap-start"
               >
                 <div className="relative aspect-video overflow-hidden">
                   <img 
@@ -608,8 +608,8 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts, isAdmin
                     <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{lesson.duration}</span>
                   </div>
                 </div>
-                <div className="p-4 md:p-6">
-                  <h3 className="font-black text-sm md:text-lg uppercase italic tracking-tighter group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight">{lesson.title}</h3>
+                <div className="p-3 md:p-6">
+                  <h3 className="font-black text-[10px] md:text-lg uppercase italic tracking-tighter group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight">{lesson.title}</h3>
                 </div>
               </div>
             ))}
@@ -803,7 +803,7 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts, isAdmin
               return (
                 <div 
                   key={mod.id} 
-                  className={`group cursor-pointer relative flex-shrink-0 w-[280px] md:w-auto snap-start ${locked ? 'opacity-80' : ''}`}
+                  className={`group cursor-pointer relative flex-shrink-0 w-[180px] md:w-auto snap-start ${locked ? 'opacity-80' : ''}`}
                   onClick={() => enterModule(mod, 'main')}
                 >
                   <div className={`relative overflow-hidden rounded-2xl ring-1 ring-white/5 group-hover:ring-amber-500/40 transition-all shadow-2xl shadow-black duration-500 ${
@@ -819,10 +819,10 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts, isAdmin
                     {!mod.hideTitle && (
                       <>
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
-                        <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6">
-                          <h3 className="font-black text-sm lg:text-xl leading-tight drop-shadow-2xl text-white group-hover:text-amber-500 transition-colors uppercase italic tracking-tighter">{mod.title}</h3>
-                          <div className="flex items-center justify-between mt-2 md:mt-3">
-                            <span className="text-[9px] md:text-[10px] text-white/40 font-black uppercase tracking-widest">{mod.lessons.length} {t('lessonsCount')}</span>
+                        <div className="absolute bottom-3 left-3 right-3 md:bottom-6 md:left-6 md:right-6">
+                          <h3 className="font-black text-[10px] md:text-sm lg:text-xl leading-tight drop-shadow-2xl text-white group-hover:text-amber-500 transition-colors uppercase italic tracking-tighter">{mod.title}</h3>
+                          <div className="flex items-center justify-between mt-1 md:mt-3">
+                            <span className="text-[8px] md:text-[10px] text-white/40 font-black uppercase tracking-widest">{mod.lessons.length} {t('lessonsCount')}</span>
                           </div>
                         </div>
                       </>
