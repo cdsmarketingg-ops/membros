@@ -1424,11 +1424,11 @@ onChange={(e) => setFormData({
                         <input 
                           type="text" 
                           readOnly
-                          value={`${window.location.origin}/api/webhook/hotmart`}
+                          value="https://api.rafaelpedrozo.online/membros/webhook/hotmart"
                           className="flex-1 bg-black border border-white/5 rounded px-4 py-3 text-white/60 text-[10px] outline-none font-mono"
                         />
                         <button 
-                          onClick={() => copyToClipboard(`${window.location.origin}/api/webhook/hotmart`)}
+                          onClick={() => copyToClipboard("https://api.rafaelpedrozo.online/membros/webhook/hotmart")}
                           className="bg-white/5 hover:bg-white/10 text-white px-4 rounded font-black text-[10px] transition-all border border-white/10"
                         >
                           COPIAR
@@ -1451,11 +1451,65 @@ onChange={(e) => setFormData({
                         <input 
                           type="text" 
                           readOnly
-                          value={`${window.location.origin}/api/webhook/kiwify`}
+                          value="https://api.rafaelpedrozo.online/membros/webhook/kiwify"
                           className="flex-1 bg-black border border-white/5 rounded px-4 py-3 text-white/60 text-[10px] outline-none font-mono"
                         />
                         <button 
-                          onClick={() => copyToClipboard(`${window.location.origin}/api/webhook/kiwify`)}
+                          onClick={() => copyToClipboard("https://api.rafaelpedrozo.online/membros/webhook/kiwify")}
+                          className="bg-white/5 hover:bg-white/10 text-white px-4 rounded font-black text-[10px] transition-all border border-white/10"
+                        >
+                          COPIAR
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-[9px] text-white/20 leading-relaxed">
+                      Eventos: <b>paid</b>, <b>completed</b>, <b>refunded</b>, <b>chargeback</b>, <b>canceled</b>.
+                    </p>
+                  </div>
+
+                  {/* Cakto */}
+                  <div className="bg-black/40 border border-white/10 rounded-xl p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Cakto</label>
+                      <span className="text-[8px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full font-bold">ATIVO</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          readOnly
+                          value="https://api.rafaelpedrozo.online/membros/webhook/cakto"
+                          className="flex-1 bg-black border border-white/5 rounded px-4 py-3 text-white/60 text-[10px] outline-none font-mono"
+                        />
+                        <button 
+                          onClick={() => copyToClipboard("https://api.rafaelpedrozo.online/membros/webhook/cakto")}
+                          className="bg-white/5 hover:bg-white/10 text-white px-4 rounded font-black text-[10px] transition-all border border-white/10"
+                        >
+                          COPIAR
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-[9px] text-white/20 leading-relaxed">
+                      Eventos: <b>paid</b>, <b>completed</b>, <b>refunded</b>, <b>chargeback</b>, <b>canceled</b>.
+                    </p>
+                  </div>
+
+                  {/* Ticto */}
+                  <div className="bg-black/40 border border-white/10 rounded-xl p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Ticto</label>
+                      <span className="text-[8px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full font-bold">ATIVO</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          readOnly
+                          value="https://api.rafaelpedrozo.online/membros/webhook/ticto"
+                          className="flex-1 bg-black border border-white/5 rounded px-4 py-3 text-white/60 text-[10px] outline-none font-mono"
+                        />
+                        <button 
+                          onClick={() => copyToClipboard("https://api.rafaelpedrozo.online/membros/webhook/ticto")}
                           className="bg-white/5 hover:bg-white/10 text-white px-4 rounded font-black text-[10px] transition-all border border-white/10"
                         >
                           COPIAR
