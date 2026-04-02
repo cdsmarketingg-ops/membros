@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { CourseConfig, Lesson, Module, StudentView } from '../types';
-import { Play, Search, Bell, Menu, Headphones, Download, Tag, Calendar, Layout, X, List, Lock, ShoppingCart, User, MessageCircle, FileText, ExternalLink } from 'lucide-react';
+import { Play, Search, Bell, Menu, Headphones, Download, Tag, Calendar, Layout, X, List, Lock, ShoppingCart, User, MessageCircle, FileText, ExternalLink, ChevronRight } from 'lucide-react';
 
 interface StudentAreaProps {
   course: CourseConfig;
@@ -583,13 +583,14 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts, isAdmin
 
         {/* LESSONS LIST */}
         <section className="px-4 md:px-12 py-10 md:py-20 max-w-6xl mx-auto">
-          <div className="flex overflow-x-auto pb-6 md:pb-0 md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 snap-x snap-mandatory scrollbar-hide">
-            {selectedModule?.lessons.map((lesson, idx) => (
-              <div 
-                key={lesson.id}
-                onClick={() => selectLesson(selectedModule!, lesson, activeCourseId)}
-                className="group cursor-pointer bg-white/5 rounded-2xl overflow-hidden border border-white/5 hover:border-amber-500/50 transition-all shadow-2xl flex-shrink-0 w-[180px] md:w-auto snap-start"
-              >
+          <div className="relative group/scroll">
+            <div className="flex overflow-x-auto pb-6 md:pb-0 md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 snap-x snap-mandatory scrollbar-hide pr-10 md:pr-0">
+              {selectedModule?.lessons.map((lesson, idx) => (
+                <div 
+                  key={lesson.id}
+                  onClick={() => selectLesson(selectedModule!, lesson, activeCourseId)}
+                  className="group cursor-pointer bg-white/5 rounded-2xl overflow-hidden border border-white/5 hover:border-amber-500/50 transition-all shadow-2xl flex-shrink-0 w-[155px] md:w-auto snap-start"
+                >
                 <div className="relative aspect-video overflow-hidden">
                   <img 
                     src={lesson.thumbnailUrl} 
@@ -613,6 +614,13 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts, isAdmin
                 </div>
               </div>
             ))}
+          </div>
+          {/* MOBILE SCROLL HINT */}
+          {(selectedModule?.lessons.length || 0) > 2 && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 flex items-center justify-center lg:hidden pointer-events-none animate-pulse z-10">
+              <ChevronRight size={16} className="text-amber-500" />
+            </div>
+          )}
           </div>
         </section>
         {/* STUDENT FOOTER */}
@@ -797,15 +805,16 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts, isAdmin
             <div className="h-[1px] flex-1 mx-4 md:mx-12 bg-white/5" />
           </div>
 
-          <div className="flex overflow-x-auto pb-6 md:pb-0 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-10 snap-x snap-mandatory scrollbar-hide">
-            {course.modules.map((mod) => {
-              const locked = isModuleLocked(mod);
-              return (
-                <div 
-                  key={mod.id} 
-                  className={`group cursor-pointer relative flex-shrink-0 w-[180px] md:w-auto snap-start ${locked ? 'opacity-80' : ''}`}
-                  onClick={() => enterModule(mod, 'main')}
-                >
+          <div className="relative group/scroll">
+            <div className="flex overflow-x-auto pb-6 md:pb-0 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-10 snap-x snap-mandatory scrollbar-hide pr-10 md:pr-0">
+              {course.modules.map((mod) => {
+                const locked = isModuleLocked(mod);
+                return (
+                  <div 
+                    key={mod.id} 
+                    className={`group cursor-pointer relative flex-shrink-0 w-[155px] md:w-auto snap-start ${locked ? 'opacity-80' : ''}`}
+                    onClick={() => enterModule(mod, 'main')}
+                  >
                   <div className={`relative overflow-hidden rounded-2xl ring-1 ring-white/5 group-hover:ring-amber-500/40 transition-all shadow-2xl shadow-black duration-500 ${
                     course.moduleThumbnailOrientation === 'horizontal' ? 'aspect-video' : 'aspect-[2/3]'
                   }`}>
@@ -844,6 +853,13 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts, isAdmin
                 </div>
               );
             })}
+          </div>
+          {/* MOBILE SCROLL HINT */}
+          {course.modules.length > 2 && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 flex items-center justify-center lg:hidden pointer-events-none animate-pulse z-10">
+              <ChevronRight size={16} className="text-amber-500" />
+            </div>
+          )}
           </div>
         </section>
       )}
