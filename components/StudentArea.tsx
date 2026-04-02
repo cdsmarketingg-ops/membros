@@ -583,12 +583,12 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts, isAdmin
 
         {/* LESSONS LIST */}
         <section className="px-4 md:px-12 py-10 md:py-20 max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+          <div className="flex overflow-x-auto pb-6 md:pb-0 md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 snap-x snap-mandatory scrollbar-hide">
             {selectedModule?.lessons.map((lesson, idx) => (
               <div 
                 key={lesson.id}
                 onClick={() => selectLesson(selectedModule!, lesson, activeCourseId)}
-                className="group cursor-pointer bg-white/5 rounded-2xl overflow-hidden border border-white/5 hover:border-amber-500/50 transition-all shadow-2xl"
+                className="group cursor-pointer bg-white/5 rounded-2xl overflow-hidden border border-white/5 hover:border-amber-500/50 transition-all shadow-2xl flex-shrink-0 w-[280px] md:w-auto snap-start"
               >
                 <div className="relative aspect-video overflow-hidden">
                   <img 
@@ -797,13 +797,13 @@ const StudentArea: React.FC<StudentAreaProps> = ({ course, userProducts, isAdmin
             <div className="h-[1px] flex-1 mx-4 md:mx-12 bg-white/5" />
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-10">
+          <div className="flex overflow-x-auto pb-6 md:pb-0 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-10 snap-x snap-mandatory scrollbar-hide">
             {course.modules.map((mod) => {
               const locked = isModuleLocked(mod);
               return (
                 <div 
                   key={mod.id} 
-                  className={`group cursor-pointer relative ${locked ? 'opacity-80' : ''}`}
+                  className={`group cursor-pointer relative flex-shrink-0 w-[280px] md:w-auto snap-start ${locked ? 'opacity-80' : ''}`}
                   onClick={() => enterModule(mod, 'main')}
                 >
                   <div className={`relative overflow-hidden rounded-2xl ring-1 ring-white/5 group-hover:ring-amber-500/40 transition-all shadow-2xl shadow-black duration-500 ${
